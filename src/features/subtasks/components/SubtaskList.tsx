@@ -3,10 +3,11 @@ import type { SubtaskWithSession } from '../../../shared/types/common.types';
 import { SubtaskItem } from './SubtaskItem';
 import { Button } from '../../../shared/components/Button';
 import { Input } from '../../../shared/components/Input';
+import { CategorySelector } from '../../categories/components/CategorySelector';
 
 interface SubtaskListProps {
   subtasksWithSessions: SubtaskWithSession[];
-  onCreateSubtask: (title: string) => void;
+  onCreateSubtask: (title: string, categoryId?: string) => void;
   onDeleteSubtask: (subtaskId: string) => void;
   onStart: (subtaskId: string) => void;
   onPause: (subtaskId: string, duration: number) => void;
@@ -24,12 +25,14 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
   onComplete,
 }) => {
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddSubtask = () => {
     if (newSubtaskTitle.trim()) {
-      onCreateSubtask(newSubtaskTitle.trim());
+      onCreateSubtask(newSubtaskTitle.trim(), selectedCategoryId);
       setNewSubtaskTitle('');
+      setSelectedCategoryId(undefined);
       setIsAdding(false);
     }
   };
@@ -46,33 +49,46 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
       </div>
 
       {isAdding && (
-        <div className="flex gap-2">
-          <Input
-            value={newSubtaskTitle}
-            onChange={(e) => setNewSubtaskTitle(e.target.value)}
-            placeholder="Enter subtask title..."
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleAddSubtask();
-              if (e.key === 'Escape') {
+        <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Subtask Title
+            </label>
+            <Input
+              value={newSubtaskTitle}
+              onChange={(e) => setNewSubtaskTitle(e.target.value)}
+              placeholder="Enter subtask title..."
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) handleAddSubtask();
+                if (e.key === 'Escape') {
+                  setIsAdding(false);
+                  setNewSubtaskTitle('');
+                  setSelectedCategoryId(undefined);
+                }
+              }}
+            />
+          </div>
+          <CategorySelector
+            value={selectedCategoryId}
+            onChange={setSelectedCategoryId}
+          />
+          <div className="flex gap-2">
+            <Button size="sm" variant="primary" onClick={handleAddSubtask} disabled={!newSubtaskTitle.trim()}>
+              Add Subtask
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
                 setIsAdding(false);
                 setNewSubtaskTitle('');
-              }
-            }}
-          />
-          <Button size="sm" variant="primary" onClick={handleAddSubtask}>
-            Add
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => {
-              setIsAdding(false);
-              setNewSubtaskTitle('');
-            }}
-          >
-            Cancel
-          </Button>
+                setSelectedCategoryId(undefined);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       )}
 

@@ -11,19 +11,50 @@ A modern desktop task management application with integrated time tracking and g
 
 - 📋 **Task Management**: Create, organize, and track tasks with subtasks
 - ⏱️ **Real-time Tracking**: Integrated timer with pause/resume functionality
+- 🏷️ **Category System**: Tag subtasks with customizable categories (frontend, backend, etc.)
+- ⭐ **Experience & Levels**: Earn XP in each category and level up your skills
 - 🎯 **Gamification**: Points system rewarding efficiency and productivity
-- 📊 **Visual Metrics**: Detailed statistics with interactive charts
+- 📊 **Visual Metrics**: Detailed statistics with interactive charts and category progress
 - 💾 **Offline First**: All data stored locally in SQLite
-- 🎨 **Modern UI**: Clean interface with animated status indicators
+- 🎨 **Modern UI**: Clean interface with animated status indicators and XP notifications
 - ⚡ **Performance**: Native desktop app with minimal resource usage
 
-## 🎮 Points System
+## 🎮 Gamification System
 
-### Earning Points
+### Points System
 
+**Earning Points:**
 - **Base Points**: 10 points per completed subtask
 - **Efficiency Bonus**: +5 points for subtasks completed in < 25 minutes
 - **Complexity Bonus**: +20 points for tasks with 5+ subtasks
+
+### Experience & Leveling System
+
+**How XP Works:**
+- **1 XP per second** of work on a categorized subtask
+- XP is tied to specific categories (frontend, backend, architecture, etc.)
+- Each category has its own level and XP progression
+- Visual XP gain notifications every 5 seconds while working
+
+**Level Formula:**
+```
+Level = floor(sqrt(total_xp / 100)) + 1
+XP for Next Level = (current_level)² × 100
+```
+
+**Example Progression:**
+- Level 1: 0-99 XP
+- Level 2: 100-399 XP (100 XP needed)
+- Level 3: 400-899 XP (400 XP needed)
+- Level 4: 900-1599 XP (900 XP needed)
+- Level 5: 1600-2499 XP (1600 XP needed)
+
+**Default Categories:**
+- 🎨 Frontend (`#3b82f6` - Blue)
+- ⚙️ Backend (`#10b981` - Green)
+- 🏗️ Architecture (`#8b5cf6` - Purple)
+- 💅 CSS (`#ec4899` - Pink)
+- 🌊 Tailwind (`#06b6d4` - Cyan)
 
 ### Metrics Tracked
 
@@ -32,6 +63,8 @@ A modern desktop task management application with integrated time tracking and g
 - Efficiency rate (% of subtasks completed quickly)
 - Time distribution visualization
 - Points earned breakdown
+- **Category XP and levels**
+- **Progress to next level per category**
 
 ## 🚀 Getting Started
 
@@ -79,10 +112,34 @@ A modern desktop task management application with integrated time tracking and g
 
 1. Click on any task to open the detail view
 2. Click **"+ Add Subtask"** to break down the task
-3. **Start** - Begin tracking time for a subtask
-4. **Pause** - Temporarily stop the timer (preserves accumulated time)
-5. **Resume** - Continue tracking from where you paused
-6. **Done** - Complete the subtask and stop tracking
+3. **Optional**: Select or create a category for the subtask
+   - Choose from existing categories
+   - Click "Create new category" to add a custom one
+   - Pick a color for your new category
+4. **Start** - Begin tracking time for a subtask
+5. **Pause** - Temporarily stop the timer (preserves accumulated time)
+6. **Resume** - Continue tracking from where you paused
+7. **Done** - Complete the subtask and earn XP (if categorized)
+
+### Using Categories
+
+**Assigning Categories:**
+- When creating a subtask, select a category from the dropdown
+- Categories are optional but enable the XP system
+- Create custom categories with your preferred colors
+
+**Earning XP:**
+- Start a subtask with a category assigned
+- Earn 1 XP per second of active work
+- See live XP counter in the floating tracker window
+- Watch animated "+5 XP" notifications every 5 seconds
+- XP is awarded when you complete the subtask
+
+**Tracking Progress:**
+- Open **"General Summary"** to view all category stats
+- See your level and total XP for each category
+- Monitor progress bars showing advancement to next level
+- Categories display in colorful cards with progress indicators
 
 ### Active Subtask Indicator
 
@@ -140,10 +197,16 @@ devfocus/
 │   │   ├── subtasks/
 │   │   │   ├── components/          # SubtaskList, SubtaskItem
 │   │   │   └── store/               # subtaskStore (Zustand)
+│   │   ├── categories/              # ⭐ NEW: Category & XP system
+│   │   │   ├── components/          # CategoryBadge, CategorySelector,
+│   │   │   │                        # CategoryCard, XpGainPopup
+│   │   │   ├── hooks/               # useCategories
+│   │   │   └── store/               # categoryStore (Zustand)
 │   │   ├── timer/
+│   │   │   ├── components/          # SubtaskTrackerWindow
 │   │   │   └── hooks/               # useTimer
 │   │   └── metrics/
-│   │       └── components/          # MetricsModal
+│   │       └── components/          # MetricsModal, GeneralSummaryWindow
 │   ├── shared/
 │   │   ├── components/              # Button, Input, Modal
 │   │   ├── types/                   # TypeScript type definitions
@@ -155,9 +218,9 @@ devfocus/
 │
 ├── src-tauri/                        # Rust backend
 │   ├── src/
-│   │   ├── commands.rs              # Tauri command handlers
-│   │   ├── db.rs                    # Database initialization
-│   │   ├── models.rs                # Rust data structures
+│   │   ├── commands.rs              # Tauri command handlers (includes XP logic)
+│   │   ├── db.rs                    # Database initialization (with migrations)
+│   │   ├── models.rs                # Rust data structures (Category, XP models)
 │   │   └── lib.rs                   # Application entry point
 │   └── Cargo.toml                   # Rust dependencies
 │
@@ -192,7 +255,31 @@ CREATE TABLE subtasks (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
   completed_at TEXT,
-  FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+  category_id TEXT,               -- ⭐ NEW: Links to categories table
+  FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+  FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE SET NULL
+);
+```
+
+### Categories ⭐ NEW
+```sql
+CREATE TABLE categories (
+  id TEXT PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,      -- Category name (e.g., 'frontend', 'backend')
+  color TEXT NOT NULL,            -- Hex color code (e.g., '#3b82f6')
+  created_at TEXT NOT NULL
+);
+```
+
+### Category Experience ⭐ NEW
+```sql
+CREATE TABLE category_experience (
+  id TEXT PRIMARY KEY,
+  category_id TEXT UNIQUE NOT NULL,
+  total_xp INTEGER DEFAULT 0,     -- Total XP earned in this category
+  level INTEGER DEFAULT 1,        -- Current level (calculated from total_xp)
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 ```
 
@@ -292,21 +379,29 @@ npm install
 
 ## 🚧 Roadmap
 
+### Recently Completed ✅
+
+- [x] **Category system** with customizable colors
+- [x] **Experience & leveling system** for skill progression
+- [x] **XP gain animations** with visual feedback
+- [x] **Floating timer widget** with category and XP display
+- [x] **Category statistics** in dashboard
+
 ### Planned Features
 
-- [ ] **Desktop notifications** when subtasks complete
+- [ ] **Desktop notifications** when subtasks complete or level up
 - [ ] **Tray icon** with quick actions
-- [ ] **Floating timer widget** for always-on-top display
 - [ ] **Dark mode** theme support
 - [ ] **Keyboard shortcuts** for power users
 - [ ] **Data export** (CSV, JSON)
-- [ ] **Task categories/tags** for better organization
 - [ ] **Priority levels** for tasks
-- [ ] **Historical analytics** with trends
-- [ ] **Weekly/monthly reports**
+- [ ] **Historical analytics** with XP trends per category
+- [ ] **Weekly/monthly reports** with category breakdown
 - [ ] **Pomodoro mode** integration
 - [ ] **Break reminders**
-- [ ] **Goal setting** and tracking
+- [ ] **Goal setting** for category levels
+- [ ] **Achievements system** (reach level 10, earn 10000 XP, etc.)
+- [ ] **Category leaderboard** (personal best tracking)
 
 ### Performance Optimizations
 
@@ -337,6 +432,56 @@ Contributions are welcome! Please follow these steps:
 
 MIT License - feel free to use this project for personal or commercial purposes.
 
+## 🎯 Category & XP System Deep Dive
+
+### How It Works
+
+**1. Create Categories**
+- 5 default categories included: Frontend, Backend, Architecture, CSS, Tailwind
+- Create custom categories with your own names and colors
+- Each category tracks its own XP and level independently
+
+**2. Assign to Subtasks**
+- When creating a subtask, optionally select a category
+- Categories help organize work and enable XP earning
+- Subtasks without categories don't earn XP
+
+**3. Earn Experience**
+- Start working on a categorized subtask
+- Earn **1 XP per second** of active work time
+- See real-time XP counter in the floating tracker window
+- Visual "+5 XP" notifications appear every 5 seconds
+- XP is awarded when completing the subtask
+
+**4. Level Up**
+- XP requirements increase quadratically: Level 2 needs 100 XP, Level 3 needs 400 XP
+- Each category levels up independently
+- Progress bars show advancement to next level
+
+**5. Track Progress**
+- View all category stats in the General Summary dashboard
+- See total XP, current level, and progress percentage
+- Category cards display with their custom colors
+
+### Technical Implementation
+
+**Frontend Components:**
+- `CategorySelector` - Dropdown with inline category creation
+- `CategoryBadge` - Colored tag showing category name
+- `CategoryCard` - Dashboard card with level, XP, and progress bar
+- `XpGainPopup` - Animated floating notifications
+
+**Backend Logic:**
+- XP calculated on subtask completion: `xp = duration_seconds`
+- Level formula: `level = floor(sqrt(total_xp / 100)) + 1`
+- Database stores total XP and auto-calculates level
+- Foreign key relationships with CASCADE DELETE
+
+**State Management:**
+- Zustand store for categories and XP animations
+- Real-time updates via Tauri events
+- Optimistic UI updates for smooth experience
+
 ## 🙏 Acknowledgments
 
 - **Tauri Team** - For the amazing desktop framework
@@ -348,4 +493,4 @@ MIT License - feel free to use this project for personal or commercial purposes.
 
 **Built with ❤️ using Tauri, React, and TypeScript**
 
-*DevFocus - Stay focused, track progress, earn rewards*
+*DevFocus - Stay focused, track progress, earn rewards, level up your skills* 🚀

@@ -3,6 +3,7 @@ import type { Subtask, TimeSession } from '../../../shared/types/common.types';
 import { useTimer } from '../../timer/hooks/useTimer';
 import { formatTime } from '../../../shared/utils/timeFormatter';
 import { Button } from '../../../shared/components/Button';
+import { CategoryBadge } from '../../categories/components/CategoryBadge';
 
 interface SubtaskItemProps {
   subtask: Subtask;
@@ -124,7 +125,10 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
     <div className={`p-4 border-2 rounded-lg transition-all ${statusColors[subtask.status]}`}>
       <div className="flex justify-between items-center">
         <div className="flex-1">
-          <h4 className="font-medium">{subtask.title}</h4>
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="font-medium">{subtask.title}</h4>
+            {subtask.category && <CategoryBadge category={subtask.category} />}
+          </div>
           {showTimer && (
             <p className="text-2xl font-mono font-bold mt-2">
               {formatTime(seconds)} ({seconds}s)

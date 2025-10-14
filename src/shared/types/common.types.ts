@@ -11,6 +11,29 @@ export interface Task {
   completedAt?: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  color: string;
+  createdAt: string;
+}
+
+export interface CategoryExperience {
+  id: string;
+  categoryId: string;
+  totalXp: number;
+  level: number;
+  updatedAt: string;
+}
+
+export interface CategoryStats {
+  category: Category;
+  totalXp: number;
+  level: number;
+  xpForNextLevel: number;
+  progressPercentage: number;
+}
+
 export interface Subtask {
   id: string;
   taskId: string;
@@ -19,7 +42,9 @@ export interface Subtask {
   createdAt: string;
   updatedAt: string;
   completedAt?: string;
-  totalTimeSeconds?: number; // Add this field
+  totalTimeSeconds?: number;
+  categoryId?: string;
+  category?: Category;
 }
 
 export interface TimeSession {
@@ -81,6 +106,8 @@ export interface SubtaskCompletion {
   subtask: Subtask;
   pointsEarned: number;
   timeSpentSeconds: number;
+  xpGained: number;
+  category?: Category;
 }
 
 export interface SubtaskWithSession {
@@ -97,4 +124,21 @@ export interface TaskWithSubtasksAndSessions {
   updatedAt: string;
   completedAt?: string;
   subtasksWithSessions: SubtaskWithSession[];
+}
+
+export interface DailyPoints {
+  date: string;
+  points: number;
+  subtasksCompleted: number;
+}
+
+export interface GeneralMetrics {
+  totalPoints: number;
+  pointsToday: number;
+  pointsThisWeek: number;
+  pointsLast7Days: DailyPoints[];
+  bestDay: DailyPoints | null;
+  totalTasksCompleted: number;
+  totalSubtasksCompleted: number;
+  averageCompletionTimeSeconds: number;
 }

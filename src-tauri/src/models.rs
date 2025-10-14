@@ -69,6 +69,35 @@ pub struct Task {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct Category {
+    pub id: String,
+    pub name: String,
+    pub color: String,
+    pub created_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CategoryExperience {
+    pub id: String,
+    pub category_id: String,
+    pub total_xp: i64,
+    pub level: i64,
+    pub updated_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CategoryStats {
+    pub category: Category,
+    pub total_xp: i64,
+    pub level: i64,
+    pub xp_for_next_level: i64,
+    pub progress_percentage: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Subtask {
     pub id: String,
     pub task_id: String,
@@ -78,6 +107,8 @@ pub struct Subtask {
     pub updated_at: String,
     pub completed_at: Option<String>,
     pub total_time_seconds: Option<i64>,
+    pub category_id: Option<String>,
+    pub category: Option<Category>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -155,6 +186,8 @@ pub struct SubtaskCompletion {
     pub subtask: Subtask,
     pub points_earned: i64,
     pub time_spent_seconds: i64,
+    pub xp_gained: i64,
+    pub category: Option<Category>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -175,4 +208,25 @@ pub struct TaskWithSubtasksAndSessions {
     pub updated_at: String,
     pub completed_at: Option<String>,
     pub subtasks_with_sessions: Vec<SubtaskWithSession>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DailyPoints {
+    pub date: String,
+    pub points: i64,
+    pub subtasks_completed: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GeneralMetrics {
+    pub total_points: i64,
+    pub points_today: i64,
+    pub points_this_week: i64,
+    pub points_last_7_days: Vec<DailyPoints>,
+    pub best_day: Option<DailyPoints>,
+    pub total_tasks_completed: i64,
+    pub total_subtasks_completed: i64,
+    pub average_completion_time_seconds: f64,
 }

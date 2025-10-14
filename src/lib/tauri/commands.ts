@@ -8,6 +8,10 @@ import type {
   SubtaskCompletion,
   TaskWithActiveSubtask,
   TaskWithSubtasksAndSessions,
+  GeneralMetrics,
+  Category,
+  CategoryExperience,
+  CategoryStats,
 } from '../../shared/types/common.types';
 
 // Task Commands
@@ -50,9 +54,10 @@ export const deleteTask = async (taskId: string): Promise<void> => {
 // Subtask Commands
 export const createSubtask = async (
   taskId: string,
-  title: string
+  title: string,
+  categoryId?: string
 ): Promise<Subtask> => {
-  return await invoke('create_subtask', { taskId, title });
+  return await invoke('create_subtask', { taskId, title, categoryId });
 };
 
 export const deleteSubtask = async (subtaskId: string): Promise<void> => {
@@ -104,4 +109,30 @@ export const getSubtaskWithSession = async (
   subtaskId: string
 ): Promise<[Subtask, TimeSession | null]> => {
   return await invoke('get_subtask_with_session', { subtaskId });
+};
+
+export const getGeneralMetrics = async (): Promise<GeneralMetrics> => {
+  return await invoke('get_general_metrics');
+};
+
+// Category Commands
+export const createCategory = async (
+  name: string,
+  color: string
+): Promise<Category> => {
+  return await invoke('create_category', { name, color });
+};
+
+export const listCategories = async (): Promise<Category[]> => {
+  return await invoke('list_categories');
+};
+
+export const getCategoryExperience = async (
+  categoryId: string
+): Promise<CategoryExperience> => {
+  return await invoke('get_category_experience', { categoryId });
+};
+
+export const getAllCategoryStats = async (): Promise<CategoryStats[]> => {
+  return await invoke('get_all_category_stats');
 };

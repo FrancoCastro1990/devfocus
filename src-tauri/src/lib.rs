@@ -38,7 +38,12 @@ pub fn run() {
       commands::resume_subtask,
       commands::complete_subtask,
       commands::get_task_metrics,
+      commands::get_general_metrics,
       commands::get_subtask_with_session,
+      commands::create_category,
+      commands::list_categories,
+      commands::get_category_experience,
+      commands::get_all_category_stats,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
