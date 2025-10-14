@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { TaskWithActiveSubtask } from '../../../shared/types/common.types';
 import { formatRelativeTime } from '../../../shared/utils/dateFormatter';
+import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
 
 interface TaskCardProps {
   task: TaskWithActiveSubtask;
@@ -9,6 +10,8 @@ interface TaskCardProps {
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const statusColors = {
     todo: 'bg-gray-100 border-gray-300 text-gray-700',
     in_progress: 'bg-blue-100 border-blue-400 text-blue-900',
@@ -17,9 +20,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Are you sure you want to delete this task?')) {
-      onDelete();
-    }
+    setShowDeleteModal(true);
   };
 
   return (
@@ -81,6 +82,23 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
           </button>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDialog
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={onDelete}
+        title="Delete Task?"
+        message={`Are you sure you want to delete "${task.title}"?`}
+        confirmText="Delete Task"
+        cancelText="Cancel"
+        variant="danger"
+      >
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+          <p className="font-medium">⚠️ This action cannot be undone</p>
+          <p className="mt-1 text-yellow-700">All subtasks and time sessions will be permanently deleted.</p>
+        </div>
+      </ConfirmDialog>
     </div>
   );
 };
