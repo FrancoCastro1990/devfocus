@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "tauri": "tauri",
+    "tauri:dev-windows": "tauri dev",
     "tauri:dev": "env -u GTK_PATH -u LD_LIBRARY_PATH tauri dev",
     "tauri:build": "tauri build"
   },
