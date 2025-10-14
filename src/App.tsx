@@ -462,6 +462,11 @@ function App() {
       await refetch(); // Refresh task list to show active subtask
       await refreshCurrentTask();
       await openOrUpdateTrackerWindow(subtaskId);
+
+      // Minimizar la app al tray automáticamente al iniciar una subtask
+      if (isTauri) {
+        await commands.minimizeToTray();
+      }
     } catch (error) {
       console.error('Error starting subtask:', error);
     }
