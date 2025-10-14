@@ -3,6 +3,7 @@ import { pauseSubtask, resumeSubtask, completeSubtask } from '../../../lib/tauri
 import { formatTime } from '../../../shared/utils/timeFormatter';
 import { emit, listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { useCategoryStore } from '../../categories/store/categoryStore';
 
 const parseSecondsParam = (value: string | null) => {
   if (!value) return 0;
@@ -26,6 +27,8 @@ const SubtaskTrackerWindow: React.FC = () => {
   const [isPaused, setIsPaused] = useState(initialPaused);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { activeXpGains, addXpGainAnimation, removeXpGainAnimation } = useCategoryStore();
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -82,6 +85,42 @@ const SubtaskTrackerWindow: React.FC = () => {
       unlistenClose?.();
     };
   }, []);
+
+  // XP gain animation effect - trigger every 5 seconds
+  useEffect(() => {
+    // Only trigger animations if:
+    // 1. Subtask has a category
+    // 2. Subtask is not paused
+    if (!categoryName || !categoryColor || isPaused) return;
+
+    // Trigger XP gain animation every 5 seconds
+    const interval = setInterval(() => {
+      addXpGainAnimation({
+        id: `xp-${Date.now()}`,
+        categoryName,
+        categoryColor,
+        xpAmount: 5,
+        timestamp: Date.now(),
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [categoryName, categoryColor, isPaused, addXpGainAnimation]);
+
+  // Auto-remove XP animations after 2 seconds
+  useEffect(() => {
+    if (activeXpGains.length === 0) return;
+
+    // Remove oldest animation after 2 seconds
+    const timer = setTimeout(() => {
+      const oldest = activeXpGains[0];
+      if (oldest) {
+        removeXpGainAnimation(oldest.id);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [activeXpGains, removeXpGainAnimation]);
 
   const handlePauseResume = useCallback(async () => {
     if (!subtaskId) return;
@@ -192,6 +231,33 @@ const SubtaskTrackerWindow: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* XP Gain Animations */}
+      {activeXpGains.length > 0 && (
+        <div className="absolute top-12 right-4 z-50 pointer-events-none">
+          <div className="flex flex-col gap-2">
+            {activeXpGains.map((gain, index) => (
+              <div
+                key={gain.id}
+                className="animate-float-up"
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                }}
+              >
+                <div
+                  className="px-3 py-1.5 rounded-full font-bold text-white shadow-lg text-sm"
+                  style={{
+                    backgroundColor: gain.categoryColor,
+                    boxShadow: `0 4px 12px ${gain.categoryColor}40`,
+                  }}
+                >
+                  +{gain.xpAmount} XP {gain.categoryName}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

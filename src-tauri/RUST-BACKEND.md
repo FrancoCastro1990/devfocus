@@ -514,6 +514,10 @@ En `lib.rs`:
   - `calculate_global_level(total_xp)` → `i64`
   - `get_title_for_level(level)` → `String`
 
+#### Tray Icon 🔔 NEW
+- `minimize_to_tray(app)` → `()`
+- `restore_from_tray(app)` → `()`
+
 ---
 
 ## Features Existentes
@@ -789,6 +793,149 @@ fn migrate_add_user_profile_table(conn: &Connection) -> Result<()> {
     Ok(())
 }
 ```
+
+### 7. System Tray Integration 🔔 NEW
+
+**Archivos**: `lib.rs` (líneas 28-107), `commands.rs` (líneas 1391-1406)
+
+**Responsabilidades**:
+- Crear icono en la bandeja del sistema (system tray)
+- Gestionar menú contextual del tray
+- Manejar eventos de clic en el icono
+- Comandos para minimizar/restaurar ventana
+
+**Características**:
+
+**Configuración del Tray Icon:**
+```rust
+// En lib.rs - función setup()
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::Manager;
+
+// Crear items del menú
+let show_hide = MenuItem::with_id(app, "show_hide", "Show/Hide", true, None::<&str>)?;
+let open_summary = MenuItem::with_id(app, "open_summary", "Open Summary", true, None::<&str>)?;
+let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+
+let menu = Menu::with_items(
+  app,
+  &[
+    &show_hide,
+    &PredefinedMenuItem::separator(app)?,
+    &open_summary,
+    &PredefinedMenuItem::separator(app)?,
+    &quit,
+  ],
+)?;
+```
+
+**Event Handlers:**
+```rust
+// Handler para click izquierdo - toggle show/hide
+.on_tray_icon_event(|tray, event| {
+  if let TrayIconEvent::Click {
+    button: MouseButton::Left,
+    button_state: MouseButtonState::Up,
+    ..
+  } = event
+  {
+    let app = tray.app_handle();
+    if let Some(window) = app.get_webview_window("main") {
+      let _ = if window.is_visible().unwrap_or(false) {
+        window.hide()
+      } else {
+        window.show().and_then(|_| window.set_focus())
+      };
+    }
+  }
+})
+
+// Handler para menu items
+.on_menu_event(|app, event| match event.id.as_ref() {
+  "show_hide" => {
+    // Toggle ventana principal
+    if let Some(window) = app.get_webview_window("main") {
+      let _ = if window.is_visible().unwrap_or(false) {
+        window.hide()
+      } else {
+        window.show().and_then(|_| window.set_focus())
+      };
+    }
+  }
+  "open_summary" => {
+    // Abrir o enfocar ventana de resumen
+    if let Some(window) = app.get_webview_window("general-summary") {
+      let _ = window.set_focus();
+    } else {
+      // Crear ventana si no existe
+      let summary_url = if cfg!(debug_assertions) {
+        "http://localhost:5173?view=summary"
+      } else {
+        "index.html?view=summary"
+      };
+
+      let _ = WebviewWindowBuilder::new(
+        app,
+        "general-summary",
+        tauri::WebviewUrl::App(summary_url.parse().unwrap()),
+      )
+      .title("General Summary")
+      .inner_size(960.0, 680.0)
+      .resizable(false)
+      .decorations(false)
+      .always_on_top(true)
+      .build();
+    }
+  }
+  "quit" => {
+    app.exit(0);
+  }
+  _ => {}
+})
+```
+
+**Comandos Tauri:**
+```rust
+// commands.rs
+use tauri::Manager;
+
+#[tauri::command]
+pub fn minimize_to_tray(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn restore_from_tray(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.show().map_err(|e| e.to_string())?;
+        window.set_focus().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+```
+
+**Dependencias Necesarias:**
+```toml
+# Cargo.toml
+[dependencies]
+tauri = { version = "2.8.5", features = ["tray-icon"] }
+```
+
+**Comandos**:
+- `minimize_to_tray`: Oculta la ventana principal y deja la app en el tray
+- `restore_from_tray`: Muestra y enfoca la ventana principal desde el tray
+
+**Notas Importantes**:
+- El trait `Manager` debe estar importado para acceder a `get_webview_window()`
+- El icono del tray usa el icono por defecto de la aplicación
+- Los event handlers se ejecutan en el contexto de Tauri, no de la ventana web
+- El menú se muestra con click derecho (por defecto en la mayoría de OS)
+- Left-click está configurado para toggle show/hide directamente
+- La aplicación continúa ejecutándose cuando está minimizada al tray
 
 ---
 
@@ -1214,7 +1361,7 @@ println!("Debug: {:?}", variable);
 
 ---
 
-**Última actualización**: 2025-10-14
+**Última actualización**: 2025-01-15
 
 **Versión Tauri**: 2.8
 **Versión Rust**: 1.75+

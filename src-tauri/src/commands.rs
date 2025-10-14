@@ -3,6 +3,7 @@ use chrono::{Duration, NaiveDate, Utc};
 use rusqlite::{params, Result as SqlResult};
 use std::collections::HashMap;
 use std::sync::Mutex;
+use tauri::Manager;
 use tauri::State;
 use uuid::Uuid;
 
@@ -1382,4 +1383,25 @@ pub fn get_user_profile(state: State<AppState>) -> Result<UserProfile, String> {
         .map_err(|e| e.to_string())?;
 
     Ok(profile)
+}
+
+// ============================================================================
+// TRAY ICON COMMANDS
+// ============================================================================
+
+#[tauri::command]
+pub fn minimize_to_tray(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn restore_from_tray(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.show().map_err(|e| e.to_string())?;
+        window.set_focus().map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }

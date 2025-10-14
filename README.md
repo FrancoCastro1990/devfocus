@@ -17,6 +17,7 @@ A modern desktop task management application with integrated time tracking and g
 - 🔥 **Daily Streak System**: Maintain consecutive work days and earn XP bonuses up to +50%
 - 🎯 **Gamification**: Points system rewarding efficiency and productivity
 - 📊 **Visual Metrics**: Detailed statistics with interactive charts and category progress
+- 🔔 **System Tray Integration**: Minimize to tray, quick access menu, and tray notifications
 - 💾 **Offline First**: All data stored locally in SQLite
 - 🎨 **Modern UI**: Clean interface with animated status indicators and XP notifications
 - ⚡ **Performance**: Native desktop app with minimal resource usage
@@ -209,6 +210,23 @@ XP for Next Level = (current_level)² × 100
 - See your level and total XP for each category
 - Monitor progress bars showing advancement to next level
 - Categories display in colorful cards with progress indicators
+
+### System Tray
+
+**Minimizing to Tray:**
+- Click **"Minimize to Tray"** button in the main task list view
+- The app will hide from taskbar and remain in system tray
+- Click the tray icon to show/hide the main window
+
+**Tray Menu Options:**
+- **Show/Hide**: Toggle visibility of the main window
+- **Open Summary**: Quick access to General Summary window
+- **Quit**: Exit the application completely
+
+**Tray Icon Features:**
+- Left-click the tray icon to quickly show/hide the main window
+- Right-click to access the context menu with all options
+- App continues running in background when minimized to tray
 
 ### Active Subtask Indicator
 
@@ -476,11 +494,11 @@ npm install
 - [x] **XP gain animations** with visual feedback
 - [x] **Floating timer widget** with category and XP display
 - [x] **Category statistics** in dashboard
+- [x] **System tray integration** with quick actions menu
 
 ### Planned Features
 
 - [ ] **Desktop notifications** when subtasks complete or level up
-- [ ] **Tray icon** with quick actions
 - [ ] **Dark mode** theme support
 - [ ] **Keyboard shortcuts** for power users
 - [ ] **Data export** (CSV, JSON)

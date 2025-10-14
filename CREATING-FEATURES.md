@@ -893,6 +893,195 @@ Estudiar features existentes como referencia:
 - **Simple**: `categories/` - CRUD básico
 - **Medio**: `subtasks/` - Con relaciones
 - **Complejo**: `metrics/` - Con agregaciones y cálculos
+- **Integración de Sistema**: `tray-icon` - Integración con OS (ejemplo completo abajo)
+
+---
+
+## Ejemplo Completo: Sistema de Tray Icon
+
+Este es un ejemplo real de un feature implementado recientemente en DevFocus que integra funcionalidad del sistema operativo.
+
+### Requisitos del Feature
+
+**Objetivo**: Agregar integración con el system tray del OS para permitir que la app se minimice y siga ejecutándose en segundo plano.
+
+**Características**:
+- Icono en la bandeja del sistema (system tray)
+- Menú contextual con opciones: Show/Hide, Open Summary, Quit
+- Botón "Minimize to Tray" en la interfaz principal
+- Click izquierdo en icono para mostrar/ocultar ventana
+
+### Implementación Paso a Paso
+
+#### Backend (Rust/Tauri)
+
+**1. Agregar dependencia en Cargo.toml:**
+```toml
+[dependencies]
+tauri = { version = "2.8.5", features = ["tray-icon"] }
+```
+
+**2. Configurar tray icon en lib.rs:**
+```rust
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::Manager;
+
+// En la función setup()
+// Crear menú del tray
+let show_hide = MenuItem::with_id(app, "show_hide", "Show/Hide", true, None::<&str>)?;
+let open_summary = MenuItem::with_id(app, "open_summary", "Open Summary", true, None::<&str>)?;
+let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+
+let menu = Menu::with_items(
+  app,
+  &[
+    &show_hide,
+    &PredefinedMenuItem::separator(app)?,
+    &open_summary,
+    &PredefinedMenuItem::separator(app)?,
+    &quit,
+  ],
+)?;
+
+// Crear tray icon con event handlers
+let _tray = TrayIconBuilder::new()
+  .icon(app.default_window_icon().unwrap().clone())
+  .menu(&menu)
+  .show_menu_on_left_click(false)
+  .on_tray_icon_event(|tray, event| {
+    if let TrayIconEvent::Click {
+      button: MouseButton::Left,
+      button_state: MouseButtonState::Up,
+      ..
+    } = event
+    {
+      let app = tray.app_handle();
+      if let Some(window) = app.get_webview_window("main") {
+        let _ = if window.is_visible().unwrap_or(false) {
+          window.hide()
+        } else {
+          window.show().and_then(|_| window.set_focus())
+        };
+      }
+    }
+  })
+  .on_menu_event(|app, event| match event.id.as_ref() {
+    "show_hide" => { /* toggle window */ },
+    "open_summary" => { /* open summary window */ },
+    "quit" => { app.exit(0); },
+    _ => {}
+  })
+  .build(app)?;
+```
+
+**3. Agregar comandos Tauri en commands.rs:**
+```rust
+use tauri::Manager;
+
+#[tauri::command]
+pub fn minimize_to_tray(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn restore_from_tray(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.show().map_err(|e| e.to_string())?;
+        window.set_focus().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+```
+
+**4. Registrar comandos en lib.rs:**
+```rust
+.invoke_handler(tauri::generate_handler![
+    // ... otros comandos
+    commands::minimize_to_tray,
+    commands::restore_from_tray,
+])
+```
+
+#### Frontend (React/TypeScript)
+
+**5. Crear wrappers en commands.ts:**
+```typescript
+// Tray Icon Commands
+export const minimizeToTray = async (): Promise<void> => {
+  return await invoke('minimize_to_tray');
+};
+
+export const restoreFromTray = async (): Promise<void> => {
+  return await invoke('restore_from_tray');
+};
+```
+
+**6. Agregar botón en App.tsx:**
+```typescript
+const handleMinimizeToTray = async () => {
+  if (!isTauri) return;
+  try {
+    await commands.minimizeToTray();
+  } catch (error) {
+    console.error('Error minimizing to tray:', error);
+  }
+};
+
+// En el render:
+<Button variant="secondary" onClick={handleMinimizeToTray}>
+  Minimize to Tray
+</Button>
+```
+
+### Archivos Modificados
+
+```
+src-tauri/
+├── Cargo.toml                    # Agregada feature "tray-icon"
+├── src/
+│   ├── lib.rs                    # Configuración del tray icon y menú
+│   └── commands.rs               # Comandos minimize_to_tray y restore_from_tray
+
+src/
+├── lib/tauri/commands.ts         # Wrappers TypeScript
+└── App.tsx                       # Botón "Minimize to Tray"
+```
+
+### Lecciones Aprendidas
+
+**1. Features de Tauri**: Algunas funcionalidades requieren agregar features específicos en Cargo.toml
+
+**2. Trait Manager**: Para acceder a métodos como `get_webview_window`, necesitas importar `use tauri::Manager;`
+
+**3. Event Handlers**: Los event handlers del tray se ejecutan en el contexto de Tauri, no de la ventana web
+
+**4. API Deprecations**: Usar métodos actualizados (e.g., `show_menu_on_left_click` vs `menu_on_left_click`)
+
+**5. Cross-platform**: El tray icon funciona automáticamente en Windows, macOS y Linux
+
+### Testing
+
+```bash
+# Compilar y probar
+npm run tauri:dev
+
+# Verificar:
+# 1. Icono aparece en la bandeja del sistema
+# 2. Botón "Minimize to Tray" oculta la ventana
+# 3. Click en icono muestra/oculta la ventana
+# 4. Menú contextual funciona correctamente
+# 5. Opción "Quit" cierra la aplicación
+```
+
+Este ejemplo demuestra:
+- Integración con APIs del sistema operativo
+- Uso de features de Tauri
+- Event handling en Rust
+- Comunicación bidireccional Rust ↔ TypeScript
 
 ---
 

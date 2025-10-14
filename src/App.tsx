@@ -8,8 +8,6 @@ import { useTasks } from './features/tasks/hooks/useTasks';
 import { useTaskActions } from './features/tasks/hooks/useTaskActions';
 import { useTaskStore } from './features/tasks/store/taskStore';
 import { useSubtaskStore } from './features/subtasks/store/subtaskStore';
-import { useCategoryStore } from './features/categories/store/categoryStore';
-import { XpGainPopup } from './features/categories/components/XpGainPopup';
 import { GlobalLevelHeader } from './features/user-profile/components/GlobalLevelHeader';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { emitTo, listen } from '@tauri-apps/api/event';
@@ -390,6 +388,15 @@ function App() {
     }
   };
 
+  const handleMinimizeToTray = async () => {
+    if (!isTauri) return;
+    try {
+      await commands.minimizeToTray();
+    } catch (error) {
+      console.error('Error minimizing to tray:', error);
+    }
+  };
+
   const handleCreateTask = async (title: string, description?: string) => {
     await create(title, description);
     setShowTaskForm(false);
@@ -512,37 +519,6 @@ function App() {
     }
   };
 
-  // XP gain animation effect
-  useEffect(() => {
-    if (!activeSubtaskId || !currentTask) return;
-
-    const activeEntry = currentTask.subtasksWithSessions.find(
-      (item) => item.subtask.id === activeSubtaskId,
-    );
-
-    if (!activeEntry) return;
-
-    const { subtask } = activeEntry;
-
-    // Only trigger XP animations if the subtask is in progress and has a category
-    if (subtask.status !== 'in_progress' || !subtask.category) return;
-
-    const { addXpGainAnimation } = useCategoryStore.getState();
-
-    // Trigger XP gain animation every 5 seconds
-    const interval = setInterval(() => {
-      addXpGainAnimation({
-        id: `xp-${Date.now()}`,
-        categoryName: subtask.category!.name,
-        categoryColor: subtask.category!.color,
-        xpAmount: 5,
-        timestamp: Date.now(),
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [activeSubtaskId, currentTask]);
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
@@ -564,6 +540,9 @@ function App() {
               <div className="flex gap-2">
                 <Button variant="secondary" onClick={handleOpenGeneralSummary}>
                   General Summary
+                </Button>
+                <Button variant="secondary" onClick={handleMinimizeToTray}>
+                  Minimize to Tray
                 </Button>
                 <Button variant="primary" onClick={() => setShowTaskForm(true)}>
                   + New Task
@@ -646,9 +625,6 @@ function App() {
           </div>
         )}
       </div>
-
-      {/* XP Gain Popup */}
-      <XpGainPopup />
     </div>
   );
 }

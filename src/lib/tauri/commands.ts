@@ -142,3 +142,12 @@ export const getAllCategoryStats = async (): Promise<CategoryStats[]> => {
 export const getUserProfile = async (): Promise<UserProfile> => {
   return await invoke('get_user_profile');
 };
+
+// Tray Icon Commands
+export const minimizeToTray = async (): Promise<void> => {
+  return await invoke('minimize_to_tray');
+};
+
+export const restoreFromTray = async (): Promise<void> => {
+  return await invoke('restore_from_tray');
+};
