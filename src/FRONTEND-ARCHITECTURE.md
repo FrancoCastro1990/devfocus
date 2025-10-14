@@ -98,6 +98,16 @@ src/
 │   │   └── store/
 │   │       └── categoryStore.ts
 │   │
+│   ├── user-profile/            # Sistema de nivel global y racha diaria
+│   │   ├── components/
+│   │   │   ├── GlobalLevelHeader.tsx
+│   │   │   └── StreakIndicator.tsx
+│   │   ├── hooks/
+│   │   │   └── useUserProfile.ts
+│   │   ├── store/
+│   │   │   └── userProfileStore.ts
+│   │   └── index.ts
+│   │
 │   ├── timer/
 │   │   ├── components/
 │   │   │   └── SubtaskTrackerWindow.tsx
@@ -775,7 +785,26 @@ const Button: React.FC<ButtonProps> = ({ variant = 'primary' }) => {
 
 **Store**: `categoryStore`
 
-### 5. Metrics
+### 5. User Profile & Gamification 🔥 NEW
+
+**Componentes**:
+- `GlobalLevelHeader`: Header con nivel global, título progresivo y barra de progreso
+- `StreakIndicator`: Indicador de racha diaria con animaciones y alertas
+
+**Hooks**:
+- `useUserProfile`: Fetch de perfil de usuario con nivel, XP total, título, y racha
+
+**Store**: `userProfileStore`
+
+**Características**:
+- **Sistema de Nivel Global**: Nivel único calculado del XP total de todas las categorías
+- **7 Títulos Progresivos**: Novice → Junior → Mid → Senior → Expert → Master → Legend
+- **Daily Streak System**: Tracking de días consecutivos con bonificadores de XP hasta +50%
+- **Gradientes Dinámicos**: Cada título tiene su color único en el header
+- **Streak Bonuses**: +5% XP por cada 7 días de racha
+- **At-Risk Alerts**: Notifica si la racha está en riesgo de romperse
+
+### 6. Metrics
 
 **Componentes**:
 - `GeneralSummaryWindow`: Dashboard con charts
@@ -1264,7 +1293,7 @@ npm run preview
 
 ---
 
-**Última actualización**: 2025-01-14
+**Última actualización**: 2025-10-14
 
 **Versión React**: 19.1
 **Versión TypeScript**: 5.9

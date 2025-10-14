@@ -214,6 +214,21 @@ CREATE TABLE category_experience (
 );
 ```
 
+#### User Profile 🔥 NEW
+```sql
+CREATE TABLE user_profile (
+    id TEXT PRIMARY KEY,
+    level INTEGER DEFAULT 1,              -- Global level across all categories
+    total_xp INTEGER DEFAULT 0,           -- Sum of XP from all categories
+    current_title TEXT DEFAULT 'novice',  -- Current title (novice, junior, mid, senior, expert, master, legend)
+    current_streak INTEGER DEFAULT 0,     -- Current consecutive days streak
+    longest_streak INTEGER DEFAULT 0,     -- Longest streak achieved
+    last_work_date TEXT,                  -- Last date user completed a subtask (ISO 8601)
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+```
+
 ### Índices
 
 ```sql
@@ -221,6 +236,8 @@ CREATE INDEX idx_subtasks_task_id ON subtasks(task_id);
 CREATE INDEX idx_subtasks_category_id ON subtasks(category_id);
 CREATE INDEX idx_time_sessions_subtask_id ON time_sessions(subtask_id);
 CREATE INDEX idx_category_experience_category_id ON category_experience(category_id);
+CREATE INDEX idx_user_profile_level ON user_profile(level);
+CREATE INDEX idx_user_profile_last_work ON user_profile(last_work_date);
 ```
 
 ### Migraciones
@@ -334,6 +351,38 @@ pub struct CategoryStats {
 }
 ```
 
+#### UserProfile 🔥 NEW
+```rust
+pub struct UserProfile {
+    pub id: String,
+    pub level: i64,                    // Global level across all categories
+    pub total_xp: i64,                 // Sum of XP from all categories
+    pub current_title: String,         // Current title (novice, junior, mid, etc.)
+    pub current_streak: i64,           // Current consecutive days streak
+    pub longest_streak: i64,           // Longest streak achieved
+    pub last_work_date: Option<String>, // Last date worked (ISO 8601)
+    pub created_at: String,
+    pub updated_at: String,
+    // Computed fields
+    pub xp_for_next_level: i64,
+    pub progress_percentage: f64,
+}
+```
+
+#### SubtaskCompletion (Updated) 🔥
+```rust
+pub struct SubtaskCompletion {
+    pub subtask: Subtask,
+    pub points_earned: i64,
+    pub time_spent_seconds: i64,
+    pub xp_gained: i64,
+    pub category: Option<Category>,
+    pub current_streak: i64,           // NEW: Current streak after completion
+    pub streak_bonus_percentage: f64,  // NEW: Bonus percentage applied
+    pub bonus_xp: i64,                 // NEW: Bonus XP from streak
+}
+```
+
 ### Helpers y Utilities
 
 ```rust
@@ -347,6 +396,38 @@ fn calculate_level(xp: i64) -> i64 {
 // XP requerido para siguiente nivel
 fn get_xp_for_next_level(current_level: i64) -> i64 {
     ((current_level) * (current_level)) * 100
+}
+
+// Cálculo de nivel global (más generoso que categorías) 🔥 NEW
+fn calculate_global_level(total_xp: i64) -> i64 {
+    if total_xp <= 0 { return 1; }
+    let level = ((total_xp as f64 / 500.0).sqrt().floor() as i64) + 1;
+    level.max(1)
+}
+
+// XP para siguiente nivel global 🔥 NEW
+fn get_xp_for_next_global_level(current_level: i64) -> i64 {
+    ((current_level) * (current_level)) * 500
+}
+
+// Obtener título basado en nivel global 🔥 NEW
+fn get_title_for_level(level: i64) -> String {
+    match level {
+        1..=4 => "novice".to_string(),
+        5..=9 => "junior".to_string(),
+        10..=14 => "mid".to_string(),
+        15..=19 => "senior".to_string(),
+        20..=24 => "expert".to_string(),
+        25..=29 => "master".to_string(),
+        _ => "legend".to_string(),
+    }
+}
+
+// Calcular bonus de streak 🔥 NEW
+fn calculate_streak_bonus(streak_days: i64) -> f64 {
+    let weeks = (streak_days / 7) as f64;
+    let bonus_percentage = (weeks * 0.05).min(0.50); // Max 50%
+    bonus_percentage
 }
 ```
 
@@ -423,6 +504,15 @@ En `lib.rs`:
 #### Metrics
 - `get_general_metrics()` → `GeneralMetrics`
 - `get_task_metrics(task_id)` → `TaskMetrics`
+
+#### User Profile & Gamification 🔥 NEW
+- `get_user_profile()` → `UserProfile`
+- `update_user_profile_level()` → `()`
+- Internal helpers:
+  - `calculate_streak_bonus(streak_days)` → `f64`
+  - `update_user_streak(conn)` → `Result<i64, String>`
+  - `calculate_global_level(total_xp)` → `i64`
+  - `get_title_for_level(level)` → `String`
 
 ---
 
@@ -542,6 +632,163 @@ progress = (xp_in_current / xp_needed) × 100;
 **Comandos**:
 - `get_general_metrics`
 - `get_task_metrics`
+
+### 6. User Profile & Gamification System 🔥 NEW
+
+**Archivos**: `commands.rs` (líneas 900+), `models.rs` (líneas 237-252), `db.rs` (migración)
+
+**Responsabilidades**:
+- Tracking de nivel global del usuario
+- Sistema de títulos progresivos (7 títulos)
+- Daily streak system con bonificadores de XP
+- Actualización automática de perfil al completar subtasks
+
+**Características**:
+
+**Sistema de Nivel Global:**
+```rust
+// Nivel más generoso que categorías individuales
+global_level = floor(sqrt(total_xp / 500)) + 1
+xp_for_next = (level)² × 500
+
+// Ejemplos:
+// Level 1: 0-499 XP
+// Level 5: 8000-12499 XP
+// Level 10: 40500-49999 XP
+```
+
+**Sistema de Títulos:**
+- 🌱 Novice (1-4)
+- 💼 Junior Developer (5-9)
+- 🚀 Mid Developer (10-14)
+- 💎 Senior Developer (15-19)
+- 🏅 Expert Developer (20-24)
+- 👑 Master Developer (25-29)
+- ⭐ Legend (30+)
+
+**Daily Streak System:**
+```rust
+// Bonus de +5% por cada 7 días, máximo 50%
+streak_bonus = min(floor(streak_days / 7) × 0.05, 0.50)
+
+// Aplicación del bonus
+base_xp = duration_seconds
+bonus_xp = (base_xp as f64 × streak_bonus) as i64
+total_xp = base_xp + bonus_xp
+
+// Ejemplos:
+// 7 días → +5% XP
+// 14 días → +10% XP
+// 28 días → +20% XP
+// 70+ días → +50% XP (máximo)
+```
+
+**Lógica de Streak:**
+```rust
+fn update_user_streak(conn: &Connection) -> Result<i64, String> {
+    let today = chrono::Utc::now().date_naive().format("%Y-%m-%d").to_string();
+
+    // Obtener datos actuales
+    let (current_streak, longest_streak, last_work_date) = // ... query
+
+    // Calcular nueva racha
+    let new_streak = if let Some(last_date) = last_work_date {
+        if last_date == today {
+            current_streak  // Mismo día, no cambia
+        } else if is_consecutive_day(last_date, today) {
+            current_streak + 1  // Día consecutivo
+        } else {
+            1  // Racha rota, reiniciar
+        }
+    } else {
+        1  // Primera vez
+    };
+
+    // Actualizar longest_streak si aplica
+    let new_longest = new_streak.max(longest_streak);
+
+    // Guardar en DB
+    Ok(new_streak)
+}
+```
+
+**Integración con complete_subtask:**
+```rust
+pub fn complete_subtask(id: String, duration: i64, state: State<AppState>)
+    -> Result<SubtaskCompletion, String> {
+    // ... código existente ...
+
+    // Actualizar streak
+    let current_streak = update_user_streak(&conn)?;
+
+    // Calcular bonus de streak
+    let base_xp = duration_seconds;
+    let streak_bonus = calculate_streak_bonus(current_streak);
+    let bonus_xp = (base_xp as f64 * streak_bonus) as i64;
+    let xp_gained = base_xp + bonus_xp;
+
+    // Actualizar category XP
+    update_category_xp(&conn, category_id, xp_gained)?;
+
+    // Actualizar perfil global
+    update_user_profile_level(&conn)?;
+
+    // Retornar con info de streak
+    Ok(SubtaskCompletion {
+        subtask,
+        points_earned,
+        time_spent_seconds: duration_seconds,
+        xp_gained,
+        category,
+        current_streak,
+        streak_bonus_percentage: streak_bonus,
+        bonus_xp,
+    })
+}
+```
+
+**Comandos**:
+- `get_user_profile`: Obtiene perfil con nivel, XP total, título, y racha
+- `update_user_profile_level`: Recalcula nivel global basado en XP total de categorías (llamado automáticamente)
+
+**Database Migration:**
+```rust
+fn migrate_add_user_profile_table(conn: &Connection) -> Result<()> {
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS user_profile (
+            id TEXT PRIMARY KEY,
+            level INTEGER DEFAULT 1,
+            total_xp INTEGER DEFAULT 0,
+            current_title TEXT DEFAULT 'novice',
+            current_streak INTEGER DEFAULT 0,
+            longest_streak INTEGER DEFAULT 0,
+            last_work_date TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )",
+        [],
+    )?;
+
+    // Crear perfil inicial si no existe
+    let profile_exists: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM user_profile",
+        [],
+        |row| row.get(0)
+    ).unwrap_or(0);
+
+    if profile_exists == 0 {
+        let id = uuid::Uuid::new_v4().to_string();
+        let now = chrono::Utc::now().to_rfc3339();
+        conn.execute(
+            "INSERT INTO user_profile (id, created_at, updated_at)
+             VALUES (?1, ?2, ?3)",
+            params![id, &now, &now],
+        )?;
+    }
+
+    Ok(())
+}
+```
 
 ---
 
@@ -967,7 +1214,7 @@ println!("Debug: {:?}", variable);
 
 ---
 
-**Última actualización**: 2025-01-14
+**Última actualización**: 2025-10-14
 
 **Versión Tauri**: 2.8
 **Versión Rust**: 1.75+

@@ -44,6 +44,7 @@ pub fn run() {
       commands::list_categories,
       commands::get_category_experience,
       commands::get_all_category_stats,
+      commands::get_user_profile,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

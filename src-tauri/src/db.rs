@@ -113,8 +113,38 @@ fn create_tables(conn: &Connection) -> Result<()> {
         [],
     )?;
 
+    // User profile table
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS user_profile (
+            id TEXT PRIMARY KEY,
+            level INTEGER DEFAULT 1,
+            total_xp INTEGER DEFAULT 0,
+            current_title TEXT DEFAULT 'novice',
+            current_streak INTEGER DEFAULT 0,
+            longest_streak INTEGER DEFAULT 0,
+            last_work_date TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )",
+        [],
+    )?;
+
+    // Create index for user_profile
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_user_profile_level ON user_profile(level)",
+        [],
+    )?;
+
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_user_profile_last_work ON user_profile(last_work_date)",
+        [],
+    )?;
+
     // Insert default categories if they don't exist
     seed_default_categories(conn)?;
+
+    // Initialize user profile if it doesn't exist
+    init_user_profile(conn)?;
 
     Ok(())
 }
@@ -176,6 +206,32 @@ fn seed_default_categories(conn: &Connection) -> Result<()> {
              VALUES (?1, ?2, 0, 1, ?3)",
             rusqlite::params![exp_id, &category_id, &now],
         )?;
+    }
+
+    Ok(())
+}
+
+fn init_user_profile(conn: &Connection) -> Result<()> {
+    // Check if user profile exists
+    let profile_exists: i64 = conn
+        .query_row(
+            "SELECT COUNT(*) FROM user_profile",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(0);
+
+    if profile_exists == 0 {
+        let id = uuid::Uuid::new_v4().to_string();
+        let now = chrono::Utc::now().to_rfc3339();
+
+        conn.execute(
+            "INSERT INTO user_profile (id, level, total_xp, current_title, current_streak, longest_streak, created_at, updated_at)
+             VALUES (?1, 1, 0, 'novice', 0, 0, ?2, ?3)",
+            rusqlite::params![id, &now, &now],
+        )?;
+
+        println!("Initialized user profile");
     }
 
     Ok(())

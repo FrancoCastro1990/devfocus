@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { pauseSubtask, resumeSubtask, completeSubtask } from '../../../lib/tauri/commands';
 import { formatTime } from '../../../shared/utils/timeFormatter';
 import { emit, listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 const parseSecondsParam = (value: string | null) => {
   if (!value) return 0;
@@ -66,8 +67,8 @@ const SubtaskTrackerWindow: React.FC = () => {
         console.error('Failed to listen for tracker load events', err);
       });
 
-    listen('subtask-tracker:close', () => {
-      window.close();
+    listen('subtask-tracker:close', async () => {
+      await getCurrentWindow().close();
     })
       .then((fn) => {
         unlistenClose = fn;
@@ -112,7 +113,7 @@ const SubtaskTrackerWindow: React.FC = () => {
       setError(null);
       await completeSubtask(subtaskId, seconds);
       await emit('subtask-tracker:updated', { action: 'done', subtaskId });
-      window.close();
+      await getCurrentWindow().close();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to complete the subtask.');
     } finally {
@@ -120,8 +121,8 @@ const SubtaskTrackerWindow: React.FC = () => {
     }
   }, [seconds, subtaskId]);
 
-  const handleClose = useCallback(() => {
-    window.close();
+  const handleClose = useCallback(async () => {
+    await getCurrentWindow().close();
   }, []);
 
   const formattedTime = formatTime(seconds);

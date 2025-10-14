@@ -10,6 +10,7 @@ import { useTaskStore } from './features/tasks/store/taskStore';
 import { useSubtaskStore } from './features/subtasks/store/subtaskStore';
 import { useCategoryStore } from './features/categories/store/categoryStore';
 import { XpGainPopup } from './features/categories/components/XpGainPopup';
+import { GlobalLevelHeader } from './features/user-profile/components/GlobalLevelHeader';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { emitTo, listen } from '@tauri-apps/api/event';
 import * as commands from './lib/tauri/commands';
@@ -236,7 +237,13 @@ function App() {
         title: 'Task Summary',
         width: 860,
         height: 640,
-        resizable: true,
+        resizable: false,
+        decorations: false,
+        alwaysOnTop: true,
+      });
+
+      taskSummaryWindow.once('tauri://created', () => {
+        console.log('✅ Task Summary window created with decorations: false, alwaysOnTop: true');
       });
 
       taskSummaryWindow.once('tauri://error', (event) => {
@@ -342,6 +349,12 @@ function App() {
   const handleOpenGeneralSummary = async () => {
     if (typeof window === 'undefined') return;
 
+    if (!isTauri) {
+      const fallbackUrl = `${window.location.origin}?view=summary`;
+      window.open(fallbackUrl, '_blank', 'noopener');
+      return;
+    }
+
     try {
       const existing = await WebviewWindow.getByLabel('general-summary');
       if (existing) {
@@ -358,7 +371,13 @@ function App() {
         title: 'General Summary',
         width: 960,
         height: 680,
-        resizable: true,
+        resizable: false,
+        decorations: false,
+        alwaysOnTop: true,
+      });
+
+      summaryWindow.once('tauri://created', () => {
+        console.log('✅ General Summary window created with decorations: false, alwaysOnTop: true');
       });
 
       summaryWindow.once('tauri://error', (event) => {
@@ -467,7 +486,15 @@ function App() {
 
   const handleCompleteSubtask = async (subtaskId: string, duration: number) => {
     try {
-      await commands.completeSubtask(subtaskId, duration);
+      const completion = await commands.completeSubtask(subtaskId, duration);
+
+      // Log streak bonus if present
+      if (completion.streakBonusPercentage > 0) {
+        console.log(
+          `🔥 Streak bonus! +${(completion.streakBonusPercentage * 100).toFixed(0)}% XP (${completion.bonusXp} bonus XP)`
+        );
+      }
+
       setActiveSubtask(null, null);
       await refetch(); // Refresh task list since active subtask is now completed
       const updatedTask = await refreshCurrentTask();
@@ -524,6 +551,9 @@ function App() {
           <h1 className="text-4xl font-bold text-gray-900">DevFocus</h1>
           <p className="text-gray-600 mt-2">Task management with timer and points system</p>
         </div>
+
+        {/* Global Level Header */}
+        <GlobalLevelHeader />
 
         {/* Main Content */}
         {!currentTask ? (

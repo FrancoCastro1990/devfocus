@@ -188,6 +188,9 @@ pub struct SubtaskCompletion {
     pub time_spent_seconds: i64,
     pub xp_gained: i64,
     pub category: Option<Category>,
+    pub current_streak: i64,
+    pub streak_bonus_percentage: f64,
+    pub bonus_xp: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -229,4 +232,21 @@ pub struct GeneralMetrics {
     pub total_tasks_completed: i64,
     pub total_subtasks_completed: i64,
     pub average_completion_time_seconds: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserProfile {
+    pub id: String,
+    pub level: i64,
+    pub total_xp: i64,
+    pub current_title: String,
+    pub current_streak: i64,
+    pub longest_streak: i64,
+    pub last_work_date: Option<String>,
+    pub created_at: String,
+    pub updated_at: String,
+    // Computed fields
+    pub xp_for_next_level: i64,
+    pub progress_percentage: f64,
 }

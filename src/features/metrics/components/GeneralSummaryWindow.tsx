@@ -4,6 +4,7 @@ import { getGeneralMetrics, getAllCategoryStats } from '../../../lib/tauri/comma
 import type { GeneralMetrics, CategoryStats } from '../../../shared/types/common.types';
 import { formatTimeVerbose } from '../../../shared/utils/timeFormatter';
 import { CategoryCard } from '../../categories/components/CategoryCard';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -54,6 +55,10 @@ const GeneralSummaryWindow: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const handleClose = useCallback(async () => {
+    await getCurrentWindow().close();
   }, []);
 
   useEffect(() => {
@@ -108,21 +113,40 @@ const GeneralSummaryWindow: React.FC = () => {
     : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">General Summary</h1>
-            <p className="text-gray-600 mt-1">
-              Review your cumulative points and recent subtask activity at a glance.
-            </p>
-          </div>
-          <div className="flex">
-            <Button variant="secondary" onClick={fetchMetrics} disabled={loading}>
-              {loading ? 'Refreshing...' : 'Refresh'}
-            </Button>
-          </div>
-        </header>
+    <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Custom Title Bar */}
+      <div className="relative flex items-center justify-between px-4 py-3 bg-gray-800 text-white cursor-move flex-shrink-0" data-tauri-drag-region>
+        <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
+          <span aria-hidden className="text-lg leading-none text-gray-400">⋮⋮</span>
+          <span className="font-semibold">General Summary</span>
+        </div>
+        <button
+          type="button"
+          aria-label="Close window"
+          onClick={handleClose}
+          className="text-gray-400 hover:text-white transition-colors pl-3 text-2xl leading-none pointer-events-auto"
+          data-tauri-drag-region-exclude
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          <div className="max-w-5xl mx-auto space-y-6">
+            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-gray-600 mt-1">
+                  Review your cumulative points and recent subtask activity at a glance.
+                </p>
+              </div>
+              <div className="flex">
+                <Button variant="secondary" onClick={fetchMetrics} disabled={loading}>
+                  {loading ? 'Refreshing...' : 'Refresh'}
+                </Button>
+              </div>
+            </header>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -252,6 +276,8 @@ const GeneralSummaryWindow: React.FC = () => {
             </section>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );

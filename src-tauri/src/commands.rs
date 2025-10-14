@@ -49,6 +49,123 @@ fn calculate_progress_percentage(total_xp: i64, current_level: i64) -> f64 {
     ((xp_in_current_level as f64 / xp_needed_for_next as f64) * 100.0).min(100.0).max(0.0)
 }
 
+/// Calculate global level from total XP (uses different formula than categories)
+/// Formula: level = floor(sqrt(xp / 500)) + 1
+fn calculate_global_level(xp: i64) -> i64 {
+    if xp <= 0 {
+        return 1;
+    }
+    let level = ((xp as f64 / 500.0).sqrt().floor() as i64) + 1;
+    level.max(1)
+}
+
+/// Calculate XP required for a specific global level
+/// Formula: xp = (level - 1)^2 * 500
+fn calculate_xp_for_global_level(level: i64) -> i64 {
+    ((level - 1).pow(2)) * 500
+}
+
+/// Get XP needed for next global level
+fn get_xp_for_next_global_level(current_level: i64) -> i64 {
+    calculate_xp_for_global_level(current_level + 1)
+}
+
+/// Get title based on global level
+fn get_title_for_level(level: i64) -> String {
+    match level {
+        1..=4 => "novice".to_string(),
+        5..=9 => "junior".to_string(),
+        10..=14 => "mid".to_string(),
+        15..=19 => "senior".to_string(),
+        20..=24 => "expert".to_string(),
+        25..=29 => "master".to_string(),
+        _ => "legend".to_string(),
+    }
+}
+
+/// Update user profile with latest global level and XP
+fn update_user_profile_level(conn: &rusqlite::Connection) -> Result<(), String> {
+    let now = Utc::now().to_rfc3339();
+
+    // Calculate total XP from all categories
+    let total_xp: i64 = conn
+        .query_row(
+            "SELECT COALESCE(SUM(total_xp), 0) FROM category_experience",
+            [],
+            |row| row.get(0),
+        )
+        .map_err(|e| format!("Failed to calculate total XP: {}", e))?;
+
+    // Calculate global level
+    let level = calculate_global_level(total_xp);
+    let title = get_title_for_level(level);
+
+    // Update user profile
+    conn.execute(
+        "UPDATE user_profile SET level = ?1, total_xp = ?2, current_title = ?3, updated_at = ?4",
+        params![level, total_xp, &title, &now],
+    )
+    .map_err(|e| format!("Failed to update user profile: {}", e))?;
+
+    Ok(())
+}
+
+/// Calculate streak bonus percentage
+/// +5% per week, maximum 50%
+fn calculate_streak_bonus(streak_days: i64) -> f64 {
+    let weeks = (streak_days / 7) as f64;
+    let bonus_percentage = (weeks * 0.05).min(0.50);
+    bonus_percentage
+}
+
+/// Update user streak when completing a subtask
+fn update_user_streak(conn: &rusqlite::Connection) -> Result<i64, String> {
+    let today = chrono::Utc::now().date_naive().format("%Y-%m-%d").to_string();
+
+    // Get current profile data
+    let (current_streak, longest_streak, last_work_date): (i64, i64, Option<String>) = conn
+        .query_row(
+            "SELECT current_streak, longest_streak, last_work_date FROM user_profile LIMIT 1",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?))
+        )
+        .map_err(|e| format!("Failed to get streak data: {}", e))?;
+
+    let new_streak = if let Some(last_date) = last_work_date {
+        if last_date == today {
+            // Same day, maintain streak
+            current_streak
+        } else if let Ok(last_parsed) = chrono::NaiveDate::parse_from_str(&last_date, "%Y-%m-%d") {
+            let today_parsed = chrono::NaiveDate::parse_from_str(&today, "%Y-%m-%d").unwrap();
+            let diff = today_parsed.signed_duration_since(last_parsed).num_days();
+
+            if diff == 1 {
+                // Consecutive day
+                current_streak + 1
+            } else {
+                // Streak broken
+                1
+            }
+        } else {
+            1
+        }
+    } else {
+        // First time
+        1
+    };
+
+    let new_longest = new_streak.max(longest_streak);
+
+    // Update in database
+    conn.execute(
+        "UPDATE user_profile SET current_streak = ?1, longest_streak = ?2, last_work_date = ?3, updated_at = ?4",
+        params![new_streak, new_longest, &today, &chrono::Utc::now().to_rfc3339()],
+    )
+    .map_err(|e| format!("Failed to update streak: {}", e))?;
+
+    Ok(new_streak)
+}
+
 // ============================================================================
 // TASK COMMANDS
 // ============================================================================
@@ -661,6 +778,9 @@ pub fn complete_subtask(
         )
         .ok();
 
+    // Update streak when completing subtask
+    let current_streak = update_user_streak(&conn)?;
+
     // Update subtask status
     conn.execute(
         "UPDATE subtasks SET status = ?1, updated_at = ?2, completed_at = ?3 WHERE id = ?4",
@@ -681,8 +801,11 @@ pub fn complete_subtask(
     let efficiency_bonus = if duration_seconds < 1500 { 5 } else { 0 }; // < 25 min
     let points = base_points + efficiency_bonus;
 
-    // Calculate XP (1 XP per second)
-    let xp_gained = duration_seconds;
+    // Calculate XP with streak bonus
+    let base_xp = duration_seconds;
+    let streak_bonus = calculate_streak_bonus(current_streak);
+    let bonus_xp = (base_xp as f64 * streak_bonus) as i64;
+    let xp_gained = base_xp + bonus_xp;
 
     // Update category experience if category exists
     let category = if let Some(cat_id) = category_id {
@@ -705,6 +828,9 @@ pub fn complete_subtask(
             params![new_xp, new_level, &now, &cat_id],
         )
         .map_err(|e| e.to_string())?;
+
+        // Update global level after category XP change
+        update_user_profile_level(&conn)?;
 
         // Fetch category info
         conn.query_row(
@@ -759,6 +885,9 @@ pub fn complete_subtask(
         time_spent_seconds: duration_seconds,
         xp_gained,
         category,
+        current_streak,
+        streak_bonus_percentage: streak_bonus,
+        bonus_xp,
     })
 }
 
@@ -1207,4 +1336,50 @@ pub fn get_task_with_subtasks_and_sessions(
         completed_at: task.completed_at,
         subtasks_with_sessions,
     })
+}
+
+// ============================================================================
+// USER PROFILE COMMANDS
+// ============================================================================
+
+#[tauri::command]
+pub fn get_user_profile(state: State<AppState>) -> Result<UserProfile, String> {
+    let conn = state.db.lock().map_err(|e| e.to_string())?;
+
+    // Fetch user profile
+    let mut stmt = conn
+        .prepare("SELECT id, level, total_xp, current_title, current_streak, longest_streak, last_work_date, created_at, updated_at FROM user_profile LIMIT 1")
+        .map_err(|e| e.to_string())?;
+
+    let profile = stmt
+        .query_row([], |row| {
+            let level: i64 = row.get(1)?;
+            let total_xp: i64 = row.get(2)?;
+            let xp_for_next = get_xp_for_next_global_level(level);
+            let xp_current_level = calculate_xp_for_global_level(level);
+            let xp_in_current = total_xp - xp_current_level;
+            let xp_needed = xp_for_next - xp_current_level;
+            let progress = if xp_needed > 0 {
+                ((xp_in_current as f64 / xp_needed as f64) * 100.0).min(100.0).max(0.0)
+            } else {
+                100.0
+            };
+
+            Ok(UserProfile {
+                id: row.get(0)?,
+                level,
+                total_xp,
+                current_title: row.get(3)?,
+                current_streak: row.get(4)?,
+                longest_streak: row.get(5)?,
+                last_work_date: row.get(6)?,
+                created_at: row.get(7)?,
+                updated_at: row.get(8)?,
+                xp_for_next_level: xp_for_next,
+                progress_percentage: progress,
+            })
+        })
+        .map_err(|e| e.to_string())?;
+
+    Ok(profile)
 }

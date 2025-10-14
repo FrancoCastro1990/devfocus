@@ -13,6 +13,8 @@ A modern desktop task management application with integrated time tracking and g
 - ⏱️ **Real-time Tracking**: Integrated timer with pause/resume functionality
 - 🏷️ **Category System**: Tag subtasks with customizable categories (frontend, backend, etc.)
 - ⭐ **Experience & Levels**: Earn XP in each category and level up your skills
+- 🏆 **Global Level System**: Track your overall progress with 7 progressive titles (Novice → Legend)
+- 🔥 **Daily Streak System**: Maintain consecutive work days and earn XP bonuses up to +50%
 - 🎯 **Gamification**: Points system rewarding efficiency and productivity
 - 📊 **Visual Metrics**: Detailed statistics with interactive charts and category progress
 - 💾 **Offline First**: All data stored locally in SQLite
@@ -28,21 +30,84 @@ A modern desktop task management application with integrated time tracking and g
 - **Efficiency Bonus**: +5 points for subtasks completed in < 25 minutes
 - **Complexity Bonus**: +20 points for tasks with 5+ subtasks
 
+### Global Level & Titles System ⭐ NEW
+
+**Global Level:**
+- Represents your **overall progress** across all categories
+- Automatically calculated from total XP earned
+- More generous progression than individual categories
+- Displayed in a dynamic header with beautiful gradients
+
+**Level Formula:**
+```
+Global Level = floor(sqrt(total_xp / 500)) + 1
+XP for Next Level = (current_level)² × 500
+```
+
+**7 Progressive Titles:**
+
+| Title | Level | Description |
+|-------|-------|-------------|
+| 🌱 Novice | 1-4 | Starting your journey |
+| 💼 Junior Developer | 5-9 | Gaining experience |
+| 🚀 Mid Developer | 10-14 | Solidifying skills |
+| 💎 Senior Developer | 15-19 | Technical mastery |
+| 🏅 Expert Developer | 20-24 | Multi-area expert |
+| 👑 Master Developer | 25-29 | Technical elite |
+| ⭐ Legend | 30+ | Living legend |
+
+Each title has its own unique color gradient displayed in the Global Level Header.
+
+### Daily Streak System 🔥 NEW
+
+**Stay Consistent, Get Rewarded:**
+- **Streak Counter**: Track consecutive days of completing at least 1 subtask
+- **XP Bonuses**: Earn +5% XP bonus for every 7 days of streak (max +50%)
+- **Smart Tracking**: Automatically updates when you complete subtasks
+- **Visual Indicator**: See your current streak with animated flame icon
+- **At-Risk Alerts**: Get notified if your streak is about to break
+
+**Streak Bonus Formula:**
+```
+Bonus = floor(streak_days / 7) × 5%
+Max Bonus = 50% (at 70+ day streak)
+
+Examples:
+- 7-day streak → +5% XP
+- 14-day streak → +10% XP
+- 28-day streak → +20% XP
+- 70-day streak → +50% XP (maximum)
+```
+
+**How It Works:**
+- Complete at least 1 subtask daily to maintain your streak
+- Bonus XP is automatically applied to all subtask completions
+- Your longest streak is saved and displayed
+- Visual feedback shows next milestone (7, 14, 30, 60, 100 days)
+
+**Streak Display:**
+The streak indicator appears in the Global Level Header when active, showing:
+- Current streak count with flame animation
+- Current bonus percentage
+- Next milestone target
+- Alert if you haven't worked today
+
 ### Experience & Leveling System
 
 **How XP Works:**
 - **1 XP per second** of work on a categorized subtask
 - XP is tied to specific categories (frontend, backend, architecture, etc.)
+- **Total XP contributes to your global level**
 - Each category has its own level and XP progression
 - Visual XP gain notifications every 5 seconds while working
 
-**Level Formula:**
+**Category Level Formula:**
 ```
-Level = floor(sqrt(total_xp / 100)) + 1
+Category Level = floor(sqrt(total_xp / 100)) + 1
 XP for Next Level = (current_level)² × 100
 ```
 
-**Example Progression:**
+**Example Category Progression:**
 - Level 1: 0-99 XP
 - Level 2: 100-399 XP (100 XP needed)
 - Level 3: 400-899 XP (400 XP needed)
@@ -63,8 +128,12 @@ XP for Next Level = (current_level)² × 100
 - Efficiency rate (% of subtasks completed quickly)
 - Time distribution visualization
 - Points earned breakdown
+- **Global level and title** ⭐
 - **Category XP and levels**
 - **Progress to next level per category**
+- **Progress to next global level** ⭐
+- **Current streak and longest streak** 🔥 NEW
+- **Streak bonus percentage** 🔥 NEW
 
 ## 🚀 Getting Started
 
@@ -197,11 +266,15 @@ devfocus/
 │   │   ├── subtasks/
 │   │   │   ├── components/          # SubtaskList, SubtaskItem
 │   │   │   └── store/               # subtaskStore (Zustand)
-│   │   ├── categories/              # ⭐ NEW: Category & XP system
+│   │   ├── categories/              # ⭐ Category & XP system
 │   │   │   ├── components/          # CategoryBadge, CategorySelector,
 │   │   │   │                        # CategoryCard, XpGainPopup
 │   │   │   ├── hooks/               # useCategories
 │   │   │   └── store/               # categoryStore (Zustand)
+│   │   ├── user-profile/            # 🔥 NEW: Global Level & Streak system
+│   │   │   ├── components/          # GlobalLevelHeader, StreakIndicator
+│   │   │   ├── hooks/               # useUserProfile
+│   │   │   └── store/               # userProfileStore (Zustand)
 │   │   ├── timer/
 │   │   │   ├── components/          # SubtaskTrackerWindow
 │   │   │   └── hooks/               # useTimer
@@ -271,7 +344,7 @@ CREATE TABLE categories (
 );
 ```
 
-### Category Experience ⭐ NEW
+### Category Experience ⭐
 ```sql
 CREATE TABLE category_experience (
   id TEXT PRIMARY KEY,
@@ -280,6 +353,21 @@ CREATE TABLE category_experience (
   level INTEGER DEFAULT 1,        -- Current level (calculated from total_xp)
   updated_at TEXT NOT NULL,
   FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE
+);
+```
+
+### User Profile 🔥 NEW
+```sql
+CREATE TABLE user_profile (
+  id TEXT PRIMARY KEY,
+  level INTEGER DEFAULT 1,        -- Global level across all categories
+  total_xp INTEGER DEFAULT 0,     -- Sum of XP from all categories
+  current_title TEXT DEFAULT 'novice', -- Current title (novice, junior, mid, senior, expert, master, legend)
+  current_streak INTEGER DEFAULT 0,    -- Current consecutive days streak
+  longest_streak INTEGER DEFAULT 0,    -- Longest streak achieved
+  last_work_date TEXT,                 -- Last date user completed a subtask (ISO 8601)
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
 );
 ```
 
@@ -383,6 +471,8 @@ npm install
 
 - [x] **Category system** with customizable colors
 - [x] **Experience & leveling system** for skill progression
+- [x] **Global Level System** with 7 progressive titles
+- [x] **Daily Streak System** with XP bonuses up to +50%
 - [x] **XP gain animations** with visual feedback
 - [x] **Floating timer widget** with category and XP display
 - [x] **Category statistics** in dashboard

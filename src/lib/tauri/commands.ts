@@ -12,6 +12,7 @@ import type {
   Category,
   CategoryExperience,
   CategoryStats,
+  UserProfile,
 } from '../../shared/types/common.types';
 
 // Task Commands
@@ -135,4 +136,9 @@ export const getCategoryExperience = async (
 
 export const getAllCategoryStats = async (): Promise<CategoryStats[]> => {
   return await invoke('get_all_category_stats');
+};
+
+// User Profile Commands
+export const getUserProfile = async (): Promise<UserProfile> => {
+  return await invoke('get_user_profile');
 };

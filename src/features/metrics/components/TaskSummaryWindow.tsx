@@ -108,6 +108,10 @@ const TaskSummaryWindow: React.FC = () => {
     }
   }, [isTauri, taskId]);
 
+  const handleClose = useCallback(async () => {
+    await getCurrentWindow().close();
+  }, []);
+
   const chartData = useMemo(() => {
     if (!metrics) return [];
     return metrics.subtasksWithTime.map((entry, index) => ({
@@ -119,37 +123,72 @@ const TaskSummaryWindow: React.FC = () => {
 
   if (!taskId) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-        <div className="max-w-md bg-white shadow-sm rounded-lg p-6 text-center space-y-3">
-          <h1 className="text-2xl font-semibold text-gray-900">Task Summary</h1>
-          <p className="text-gray-600">No task identifier was provided.</p>
-          <Button variant="secondary" onClick={async () => await getCurrentWindow().close()}>
-            Close
-          </Button>
+      <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
+        {/* Custom Title Bar */}
+        <div className="relative flex items-center justify-between px-4 py-3 bg-gray-800 text-white cursor-move flex-shrink-0" data-tauri-drag-region>
+          <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
+            <span aria-hidden className="text-lg leading-none text-gray-400">⋮⋮</span>
+            <span className="font-semibold">Task Summary</span>
+          </div>
+          <button
+            type="button"
+            aria-label="Close window"
+            onClick={handleClose}
+            className="text-gray-400 hover:text-white transition-colors pl-3 text-2xl leading-none pointer-events-auto"
+            data-tauri-drag-region-exclude
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md bg-white shadow-sm rounded-lg p-6 text-center space-y-3">
+            <h1 className="text-2xl font-semibold text-gray-900">Task Summary</h1>
+            <p className="text-gray-600">No task identifier was provided.</p>
+            <Button variant="secondary" onClick={handleClose}>
+              Close
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Task Summary</h1>
-            <p className="text-gray-600 mt-1">
-              Review performance metrics and point breakdown for your completed task.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => fetchMetrics(taskId)} disabled={loading}>
-              {loading ? 'Refreshing...' : 'Refresh'}
-            </Button>
-            <Button variant="danger" onClick={async () => await getCurrentWindow().close()}>
-              Close
-            </Button>
-          </div>
-        </header>
+    <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Custom Title Bar */}
+      <div className="relative flex items-center justify-between px-4 py-3 bg-gray-800 text-white cursor-move flex-shrink-0" data-tauri-drag-region>
+        <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
+          <span aria-hidden className="text-lg leading-none text-gray-400">⋮⋮</span>
+          <span className="font-semibold">Task Summary</span>
+        </div>
+        <button
+          type="button"
+          aria-label="Close window"
+          onClick={handleClose}
+          className="text-gray-400 hover:text-white transition-colors pl-3 text-2xl leading-none pointer-events-auto"
+          data-tauri-drag-region-exclude
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-gray-600 mt-1">
+                  Review performance metrics and point breakdown for your completed task.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => fetchMetrics(taskId)} disabled={loading}>
+                  {loading ? 'Refreshing...' : 'Refresh'}
+                </Button>
+              </div>
+            </header>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -263,6 +302,8 @@ const TaskSummaryWindow: React.FC = () => {
             </section>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );

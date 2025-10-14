@@ -108,6 +108,9 @@ export interface SubtaskCompletion {
   timeSpentSeconds: number;
   xpGained: number;
   category?: Category;
+  currentStreak: number;
+  streakBonusPercentage: number;
+  bonusXp: number;
 }
 
 export interface SubtaskWithSession {
@@ -141,4 +144,18 @@ export interface GeneralMetrics {
   totalTasksCompleted: number;
   totalSubtasksCompleted: number;
   averageCompletionTimeSeconds: number;
+}
+
+export interface UserProfile {
+  id: string;
+  level: number;
+  totalXp: number;
+  currentTitle: string;
+  currentStreak: number;
+  longestStreak: number;
+  lastWorkDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  xpForNextLevel: number;
+  progressPercentage: number;
 }
