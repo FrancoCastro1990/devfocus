@@ -95,39 +95,147 @@ body::before {
 
 /* Glass input styles - Enhanced blur */
 .glass-input {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 2px solid rgba(255, 255, 255, 0.25);
   border-radius: 0.875rem;
   padding: 0.75rem 1rem;
   color: #ffffff;
   outline: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08),
-              0 0 0 0 rgba(255, 255, 255, 0);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
+              0 4px 12px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  font-weight: 500;
+}
+
+.glass-input:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
+              0 8px 20px rgba(0, 0, 0, 0.12),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15),
+              0 0 20px rgba(147, 197, 253, 0.2);
 }
 
 .glass-input:focus {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08),
-              0 0 0 3px rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(147, 197, 253, 0.5);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
+              0 8px 24px rgba(0, 0, 0, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2),
+              0 0 0 3px rgba(147, 197, 253, 0.25),
+              0 0 30px rgba(147, 197, 253, 0.3);
+  transform: translateY(-1px);
 }
 
 .glass-input::placeholder {
   color: rgba(255, 255, 255, 0.45);
 }
 
-/* Select dropdown options styling */
-.glass-input option {
-  background: #1a1a2e;
-  color: #ffffff;
-  padding: 0.5rem;
+/* Select-specific styling - Matching custom Select component */
+select.glass-input {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  /* Custom chevron icon */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px;
+  padding-right: 2.5rem;
 }
 
-.glass-input option:checked {
-  background: linear-gradient(to right, #667eea, #764ba2);
+/* Select when opened/active */
+select.glass-input:active,
+select.glass-input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(147, 197, 253, 0.5);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
+              0 8px 24px rgba(0, 0, 0, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2),
+              0 0 0 3px rgba(147, 197, 253, 0.25),
+              0 0 30px rgba(147, 197, 253, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Select dropdown - Enhanced styling with better contrast */
+select.glass-input option {
+  /* Dark solid background matching the theme */
+  background-color: #16213e;
+  background-image: none;
+  color: #ffffff;
+  padding: 0.875rem 1.25rem;
+  font-weight: 500;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  font-size: 0.925rem;
+  letter-spacing: 0.01em;
+}
+
+/* Selected/Checked option - Purple gradient theme */
+select.glass-input option:checked,
+select.glass-input option[selected] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #667eea;
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Webkit-specific option styling (Chrome, Safari, Edge, Tauri) */
+@supports (-webkit-appearance: none) {
+  select.glass-input option {
+    background-color: #16213e;
+    background-image: none;
+    color: #ffffff;
+  }
+
+  /* Hover state - Subtle purple tint */
+  select.glass-input option:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
+    background-color: rgba(102, 126, 234, 0.6);
+    color: #ffffff;
+  }
+
+  /* Checked state - Full purple gradient */
+  select.glass-input option:checked,
+  select.glass-input option[selected] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #667eea;
+    color: #ffffff;
+    font-weight: 600;
+  }
+}
+
+/* Firefox-specific option styling */
+@-moz-document url-prefix() {
+  select.glass-input option {
+    background-color: #16213e !important;
+    color: #ffffff !important;
+    padding: 0.875rem 1.25rem !important;
+  }
+
+  select.glass-input option:checked,
+  select.glass-input option[selected] {
+    background-color: #667eea !important;
+    background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+  }
+}
+
+/* Tauri-specific enhancements */
+@supports selector(::-webkit-scrollbar) {
+  select.glass-input option {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  select.glass-input option:last-child {
+    border-bottom: none;
+  }
 }
 
 /* Scrollbar styling (glass theme) */

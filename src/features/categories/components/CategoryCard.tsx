@@ -1,6 +1,7 @@
 import React from 'react';
 import { TrendingUp } from 'lucide-react';
 import type { CategoryStats } from '../../../shared/types/common.types';
+import { ProgressBar } from '../../../shared/components/ProgressBar';
 
 interface CategoryCardProps {
   stats: CategoryStats;
@@ -52,26 +53,20 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ stats }) => {
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-2 mt-4">
-        <div className="flex justify-between text-xs text-white/60 font-sans">
+      <div className="mt-4">
+        <div className="flex justify-between text-xs text-white/60 font-sans mb-2">
           <span>{xpInCurrentLevel.toLocaleString()} XP</span>
           <span className="flex items-center gap-1">
             <TrendingUp size={12} />
             {xpNeededForNext.toLocaleString()} to Lvl {level + 1}
           </span>
         </div>
-        <div className="w-full bg-white/5 border border-white/10 h-4 overflow-hidden rounded-lg">
-          <div
-            className="h-full transition-all duration-500 ease-out"
-            style={{
-              width: `${progressPercentage}%`,
-              backgroundColor: category.color,
-            }}
-          />
-        </div>
-        <div className="text-right text-xs font-bold font-sans" style={{ color: category.color }}>
-          {progressPercentage.toFixed(1)}% Complete
-        </div>
+        <ProgressBar
+          percentage={progressPercentage}
+          color={category.color}
+          showLabels={false}
+          additionalInfo={`${progressPercentage.toFixed(1)}% Complete`}
+        />
       </div>
     </div>
   );

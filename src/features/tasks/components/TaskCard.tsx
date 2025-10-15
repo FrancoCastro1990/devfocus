@@ -3,6 +3,7 @@ import { Trash2, Clock, CheckCircle2 } from 'lucide-react';
 import type { TaskWithActiveSubtask } from '../../../shared/types/common.types';
 import { formatRelativeTime } from '../../../shared/utils/dateFormatter';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
+import { StatusBadge } from '../../../shared/components/StatusBadge';
 
 interface TaskCardProps {
   task: TaskWithActiveSubtask;
@@ -18,20 +19,37 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
     setShowDeleteModal(true);
   };
 
+  // Status-specific styles with glass effect
+  const statusStyles = {
+    todo: {
+      bg: 'rgba(147, 197, 253, 0.15)',
+      border: 'rgba(147, 197, 253, 0.4)',
+      shadow: '0 0 20px rgba(147, 197, 253, 0.25)',
+    },
+    in_progress: {
+      bg: 'rgba(167, 139, 250, 0.18)',
+      border: 'rgba(167, 139, 250, 0.5)',
+      shadow: '0 0 24px rgba(167, 139, 250, 0.35)',
+    },
+    done: {
+      bg: 'rgba(52, 211, 153, 0.15)',
+      border: 'rgba(52, 211, 153, 0.4)',
+      shadow: '0 0 20px rgba(52, 211, 153, 0.25)',
+    },
+  };
+
+  const currentStatus = statusStyles[task.status as keyof typeof statusStyles] || statusStyles.todo;
+
   return (
     <div
       onClick={onClick}
-      className="
-        p-5 border border-white/18 rounded-2xl cursor-pointer
-        transition-all duration-300
-        hover:shadow-glass-lg hover:scale-[1.02] hover:border-white/25 hover:bg-white/10
-        backdrop-blur-xl bg-white/8
-        font-sans text-white
-      "
+      className="p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02] backdrop-blur-xl font-sans text-white"
       style={{
+        backgroundColor: currentStatus.bg,
+        borderColor: currentStatus.border,
         backdropFilter: 'blur(20px) saturate(180%)',
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        boxShadow: `0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1), ${currentStatus.shadow}`,
       }}
     >
       <div className="flex justify-between items-start">
@@ -76,15 +94,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span
-            className="px-3 py-1 bg-white/8 border border-white/20 rounded-lg text-xs font-medium backdrop-blur-md"
-            style={{
-              backdropFilter: 'blur(12px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-            }}
-          >
-            {task.status.replace('_', ' ')}
-          </span>
+          <StatusBadge status={task.status as 'todo' | 'in_progress' | 'done'} variant="colored" size="sm" />
           <button
             onClick={handleDelete}
             className="p-1.5 text-red-300 hover:bg-red-500/20 border border-transparent hover:border-red-400/40 rounded-lg transition-all backdrop-blur-sm"

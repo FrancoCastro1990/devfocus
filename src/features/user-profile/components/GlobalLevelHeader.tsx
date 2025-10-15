@@ -2,6 +2,7 @@ import React from 'react';
 import { Trophy, Zap } from 'lucide-react';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { StreakIndicator } from './StreakIndicator';
+import { ProgressBar } from '../../../shared/components/ProgressBar';
 
 const TITLE_COLORS: Record<string, string> = {
   novice: '#a78bfa',    // Purple
@@ -83,24 +84,14 @@ export const GlobalLevelHeader: React.FC = () => {
       </div>
 
       {/* Progress Bar */}
-      <div className="mt-4 space-y-1 relative z-10">
-        <div className="flex justify-between text-sm font-sans text-white/60">
-          <span>LVL {userProfile.level}</span>
-          <span>LVL {userProfile.level + 1}</span>
-        </div>
-        <div className="w-full bg-white/5 h-4 overflow-hidden border border-white/10 rounded-lg">
-          <div
-            className="h-full transition-all duration-500 ease-out"
-            style={{
-              width: `${userProfile.progressPercentage}%`,
-              backgroundColor: titleColor,
-            }}
-          />
-        </div>
-        <div className="text-right text-sm font-sans font-medium text-white/80">
-          {userProfile.progressPercentage.toFixed(1)}% • {userProfile.xpForNextLevel.toLocaleString()} XP needed
-        </div>
-      </div>
+      <ProgressBar
+        percentage={userProfile.progressPercentage}
+        color={titleColor}
+        currentLabel={`LVL ${userProfile.level}`}
+        nextLabel={`LVL ${userProfile.level + 1}`}
+        additionalInfo={`${userProfile.progressPercentage.toFixed(1)}% • ${userProfile.xpForNextLevel.toLocaleString()} XP needed`}
+        className="mt-4 relative z-10"
+      />
 
       {/* Streak Indicator */}
       {userProfile.currentStreak > 0 && (

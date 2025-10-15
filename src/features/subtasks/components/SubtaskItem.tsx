@@ -1,8 +1,7 @@
 import React from 'react';
 import { Play, Pause, CheckCircle2, X } from 'lucide-react';
 import type { Subtask, TimeSession } from '../../../shared/types/common.types';
-import { useTimer } from '../../timer/hooks/useTimer';
-import { formatTime } from '../../../shared/utils/timeFormatter';
+import { useTimeCalculation } from '../../../shared/hooks/useTimeCalculation';
 import { Button } from '../../../shared/components/Button';
 import { CategoryBadge } from '../../categories/components/CategoryBadge';
 
@@ -26,57 +25,43 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
   onDelete,
 }) => {
   const isActive = subtask.status === 'in_progress';
-  // Use total accumulated time plus current session time
-  const totalAccumulatedTime = subtask.totalTimeSeconds || 0;
 
-  // Calculate initial time based on session state
-  let initialTime = totalAccumulatedTime;
-  if (session) {
-    if (isActive) {
-      // If active, calculate elapsed time from start or from resume point
-      const now = Date.now();
-      const startTime = session.resumedAt
-        ? new Date(session.resumedAt).getTime()
-        : new Date(session.startedAt).getTime();
-      const elapsedMs = now - startTime;
-      const elapsedSeconds = Math.floor(elapsedMs / 1000);
-      initialTime = totalAccumulatedTime + session.durationSeconds + elapsedSeconds;
-      console.log(`Active session calc: total=${totalAccumulatedTime}, stored=${session.durationSeconds}, elapsed=${elapsedSeconds}, total=${initialTime}`);
-    } else {
-      // If paused, use stored duration
-      initialTime = totalAccumulatedTime + session.durationSeconds;
-      console.log(`Paused session calc: total=${totalAccumulatedTime}, stored=${session.durationSeconds}, initialTime=${initialTime}`);
-    }
-  } else {
-    initialTime = 0; // No session yet
-  }
-
-  console.log(`Final initialTime for ${subtask.title} (${subtask.status}): ${initialTime}, session: ${!!session}`);
-
-  const { seconds } = useTimer({
-    initialSeconds: initialTime,
+  // Use centralized time calculation hook
+  const { totalSeconds, formattedTime } = useTimeCalculation({
+    subtask,
+    session,
     isActive,
   });
 
-  // Temporary debug
-  console.log(`SubtaskItem ${subtask.title}:`, {
-    status: subtask.status,
-    isActive,
-    hasSession: !!session,
-    session: session ? { ...session, duration_seconds: session.durationSeconds } : null,
-    totalAccumulatedTime,
-    initialTime,
-    seconds,
-    timeShown: formatTime(seconds),
-    calculation: session && !isActive ? `paused: ${totalAccumulatedTime} + ${session.durationSeconds}` : isActive ? 'active: calculating elapsed' : 'no session',
-  });
-
-  const statusColors = {
-    todo: 'bg-status-todo border-status-todo-border',
-    in_progress: 'bg-status-in-progress border-status-in-progress-border shadow-glass',
-    paused: 'bg-accent-indigo/10 border-accent-indigo/40',
-    done: 'bg-status-done border-status-done-border',
+  // Status-specific styles with glow effects
+  const statusStyles = {
+    todo: {
+      bg: 'rgba(147, 197, 253, 0.2)',
+      border: 'rgba(147, 197, 253, 0.4)',
+      shadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+      hoverShadow: '0 0 18px rgba(147, 197, 253, 0.25)',
+    },
+    in_progress: {
+      bg: 'rgba(167, 139, 250, 0.2)',
+      border: 'rgba(167, 139, 250, 0.4)',
+      shadow: '0 4px 16px rgba(0, 0, 0, 0.15), 0 0 20px rgba(167, 139, 250, 0.3)',
+      hoverShadow: '0 0 24px rgba(167, 139, 250, 0.35)',
+    },
+    paused: {
+      bg: 'rgba(129, 140, 248, 0.2)',
+      border: 'rgba(129, 140, 248, 0.4)',
+      shadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+      hoverShadow: '0 0 18px rgba(129, 140, 248, 0.25)',
+    },
+    done: {
+      bg: 'rgba(52, 211, 153, 0.2)',
+      border: 'rgba(52, 211, 153, 0.4)',
+      shadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+      hoverShadow: '0 0 18px rgba(52, 211, 153, 0.25)',
+    },
   };
+
+  const currentStatus = statusStyles[subtask.status] || statusStyles.todo;
 
   const renderActions = () => {
     switch (subtask.status) {
@@ -89,10 +74,10 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
       case 'in_progress':
         return (
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => onPause(seconds)}>
+            <Button size="sm" variant="secondary" onClick={() => onPause(totalSeconds)}>
               Pause
             </Button>
-            <Button size="sm" variant="success" onClick={() => onComplete(seconds)}>
+            <Button size="sm" variant="success" onClick={() => onComplete(totalSeconds)}>
               Done
             </Button>
           </div>
@@ -103,7 +88,7 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
             <Button size="sm" variant="primary" onClick={onResume}>
               Resume
             </Button>
-            <Button size="sm" variant="success" onClick={() => onComplete(seconds)}>
+            <Button size="sm" variant="success" onClick={() => onComplete(totalSeconds)}>
               Done
             </Button>
           </div>
@@ -126,7 +111,16 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
   const showTimer = (subtask.status !== 'todo' || (session && session.durationSeconds > 0)) && session !== null;
 
   return (
-    <div className={`p-4 border rounded-xl transition-all backdrop-blur-md font-sans ${statusColors[subtask.status]}`}>
+    <div
+      className="p-4 rounded-xl transition-all backdrop-blur-md font-sans border-2"
+      style={{
+        backgroundColor: currentStatus.bg,
+        borderColor: currentStatus.border,
+        boxShadow: currentStatus.shadow,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+      }}
+    >
       <div className="flex justify-between items-center">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
@@ -138,7 +132,7 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
           </div>
           {showTimer && (
             <p className="text-2xl font-sans font-bold mt-2 text-white">
-              {formatTime(seconds)}
+              {formattedTime}
             </p>
           )}
         </div>

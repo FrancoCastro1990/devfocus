@@ -10,6 +10,7 @@ import { useTaskStore } from './features/tasks/store/taskStore';
 import { useSubtaskStore } from './features/subtasks/store/subtaskStore';
 import { GlobalLevelHeader } from './features/user-profile/components/GlobalLevelHeader';
 import { XpGainPopup } from './features/categories/components/XpGainPopup';
+import { StatusBadge } from './shared/components/StatusBadge';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { emitTo, listen } from '@tauri-apps/api/event';
 import * as commands from './lib/tauri/commands';
@@ -606,7 +607,31 @@ function App() {
               </Button>
             </div>
 
-            <div className="glass-panel p-6 mb-6">
+            <div
+              className="glass-panel p-6 mb-6 border-2 transition-all"
+              style={{
+                backgroundColor:
+                  currentTask.status === 'done'
+                    ? 'rgba(52, 211, 153, 0.15)'
+                    : currentTask.status === 'in_progress'
+                      ? 'rgba(167, 139, 250, 0.18)'
+                      : 'rgba(147, 197, 253, 0.15)',
+                borderColor:
+                  currentTask.status === 'done'
+                    ? 'rgba(52, 211, 153, 0.4)'
+                    : currentTask.status === 'in_progress'
+                      ? 'rgba(167, 139, 250, 0.5)'
+                      : 'rgba(147, 197, 253, 0.4)',
+                boxShadow:
+                  currentTask.status === 'done'
+                    ? '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(52, 211, 153, 0.25)'
+                    : currentTask.status === 'in_progress'
+                      ? '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 24px rgba(167, 139, 250, 0.35)'
+                      : '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(147, 197, 253, 0.25)',
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              }}
+            >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <h2 className="text-3xl font-bold text-white">
@@ -636,9 +661,11 @@ function App() {
                 </div>
               </div>
               <div className="mt-4 flex gap-2">
-                <span className={`status-badge ${currentTask.status === 'in_progress' ? 'status-badge-in-progress' : currentTask.status === 'done' ? 'status-badge-done' : 'status-badge-todo'} capitalize`}>
-                  {currentTask.status.replace('_', ' ')}
-                </span>
+                <StatusBadge
+                  status={currentTask.status as 'todo' | 'in_progress' | 'done'}
+                  variant="colored"
+                  size="sm"
+                />
                 <span className="px-3 py-1 rounded-full text-sm font-medium border border-accent-pink/40 bg-accent-pink/20 text-accent-pink backdrop-blur-sm">
                   {currentTask.subtasksWithSessions.filter((s) => s.subtask.status === 'done').length}/
                   {currentTask.subtasksWithSessions.length} done

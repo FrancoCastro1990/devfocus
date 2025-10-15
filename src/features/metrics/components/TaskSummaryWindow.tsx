@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { X, RefreshCw, Clock, Target, CheckCircle2, TrendingUp } from 'lucide-react';
+import { RefreshCw, Clock, Target, CheckCircle2, TrendingUp } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
+import { WindowLayout } from '../../../shared/components/WindowLayout';
+import { StatCard } from '../../../shared/components/StatCard';
 import {
   getTaskMetrics,
   updateTaskStatus,
@@ -124,36 +126,8 @@ const TaskSummaryWindow: React.FC = () => {
 
   if (!taskId) {
     return (
-      <div className="h-screen w-screen relative flex flex-col overflow-hidden font-sans">
-        {/* Background Image */}
-        <div
-          className="fixed inset-0 z-0"
-          style={{
-            backgroundImage: 'url(/assets/image/background.jpg)',
-            backgroundSize: 'auto',
-            backgroundRepeat: 'repeat',
-          }}
-        />
-        {/* Dark overlay for better contrast */}
-        <div className="fixed inset-0 z-0 bg-black/40" />
-
-        {/* Custom Title Bar */}
-        <div className="relative z-10 flex items-center justify-between px-4 py-3 bg-glass-primary backdrop-blur-md border-b border-glass-border text-white cursor-move flex-shrink-0" data-tauri-drag-region>
-          <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
-            <span className="font-semibold">Task Summary</span>
-          </div>
-          <button
-            type="button"
-            aria-label="Close window"
-            onClick={handleClose}
-            className="text-white/60 hover:text-white transition-colors pl-3 pointer-events-auto"
-            data-tauri-drag-region-exclude
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center p-6 relative z-10">
+      <WindowLayout title="Task Summary" onClose={handleClose}>
+        <div className="flex items-center justify-center min-h-[50vh]">
           <div className="max-w-md glass-panel p-6 text-center space-y-3">
             <h1 className="text-2xl font-semibold text-white">Task Summary</h1>
             <p className="text-white/60 text-sm">No task identifier was provided.</p>
@@ -162,44 +136,13 @@ const TaskSummaryWindow: React.FC = () => {
             </Button>
           </div>
         </div>
-      </div>
+      </WindowLayout>
     );
   }
 
   return (
-    <div className="h-screen w-screen relative flex flex-col overflow-hidden font-sans">
-      {/* Background Image */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: 'url(/assets/image/background.jpg)',
-          backgroundSize: 'auto',
-          backgroundRepeat: 'repeat',
-        }}
-      />
-      {/* Dark overlay for better contrast */}
-      <div className="fixed inset-0 z-0 bg-black/40" />
-
-      {/* Custom Title Bar */}
-      <div className="relative z-10 flex items-center justify-between px-4 py-3 bg-glass-primary backdrop-blur-md border-b border-glass-border text-white cursor-move flex-shrink-0" data-tauri-drag-region>
-        <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
-          <span className="font-semibold">Task Summary</span>
-        </div>
-        <button
-          type="button"
-          aria-label="Close window"
-          onClick={handleClose}
-          className="text-white/60 hover:text-white transition-colors pl-3 pointer-events-auto"
-          data-tauri-drag-region-exclude
-        >
-          <X size={20} />
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto relative z-10">
-        <div className="p-6">
-          <div className="max-w-4xl mx-auto space-y-6">
+    <WindowLayout title="Task Summary" onClose={handleClose}>
+      <div className="max-w-4xl mx-auto space-y-6">
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between glass-panel p-4">
               <div>
                 <h1 className="text-2xl font-bold text-white">
@@ -252,46 +195,32 @@ const TaskSummaryWindow: React.FC = () => {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-6">
-                <div className="glass-panel p-5">
-                  <p className="text-sm font-medium text-white/60 flex items-center gap-2">
-                    <Clock size={16} /> Total Time
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-white">
-                    {formatTimeVerbose(metrics.totalTimeSeconds)}
-                  </p>
-                </div>
-                <div className="glass-panel p-5">
-                  <p className="text-sm font-medium text-white/60 flex items-center gap-2">
-                    <Target size={16} /> Total Points
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-white">
-                    {metrics.totalPoints}
-                  </p>
-                </div>
-                <div className="glass-panel p-5">
-                  <p className="text-sm font-medium text-white/60 flex items-center gap-2">
-                    <CheckCircle2 size={16} /> Subtasks
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-white">
-                    {metrics.subtasksCompleted}/{metrics.subtasksTotal}
-                  </p>
-                </div>
-                <div className="glass-panel p-5">
-                  <p className="text-sm font-medium text-white/60 flex items-center gap-2">
-                    <TrendingUp size={16} /> Efficiency Rate
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-white">
-                    {metrics.efficiencyRate.toFixed(0)}%
-                  </p>
-                </div>
-                <div className="glass-panel p-5 lg:col-span-2">
-                  <p className="text-sm font-medium text-white/60 flex items-center gap-2">
-                    <Clock size={16} /> Average Time / Subtask
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-white">
-                    {formatTimeVerbose(Math.floor(metrics.averageTimePerSubtask))}
-                  </p>
-                </div>
+                <StatCard
+                  label="Total Time"
+                  value={formatTimeVerbose(metrics.totalTimeSeconds)}
+                  icon={Clock}
+                />
+                <StatCard
+                  label="Total Points"
+                  value={metrics.totalPoints}
+                  icon={Target}
+                />
+                <StatCard
+                  label="Subtasks"
+                  value={`${metrics.subtasksCompleted}/${metrics.subtasksTotal}`}
+                  icon={CheckCircle2}
+                />
+                <StatCard
+                  label="Efficiency Rate"
+                  value={`${metrics.efficiencyRate.toFixed(0)}%`}
+                  icon={TrendingUp}
+                />
+                <StatCard
+                  label="Average Time / Subtask"
+                  value={formatTimeVerbose(Math.floor(metrics.averageTimePerSubtask))}
+                  icon={Clock}
+                  className="lg:col-span-2"
+                />
               </div>
             </section>
 
@@ -365,10 +294,8 @@ const TaskSummaryWindow: React.FC = () => {
             </section>
           </div>
         )}
-          </div>
-        </div>
       </div>
-    </div>
+    </WindowLayout>
   );
 };
 

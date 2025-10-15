@@ -37,6 +37,8 @@ export default {
           'todo-border': 'rgba(147, 197, 253, 0.4)',
           'in-progress': 'rgba(167, 139, 250, 0.2)',
           'in-progress-border': 'rgba(167, 139, 250, 0.4)',
+          paused: 'rgba(129, 140, 248, 0.2)',
+          'paused-border': 'rgba(129, 140, 248, 0.4)',
           done: 'rgba(52, 211, 153, 0.2)',
           'done-border': 'rgba(52, 211, 153, 0.4)',
         },

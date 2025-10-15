@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { X, RefreshCw, TrendingUp, Award, Target } from 'lucide-react';
+import { RefreshCw, TrendingUp, Award, Target } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
+import { WindowLayout } from '../../../shared/components/WindowLayout';
+import { StatCard } from '../../../shared/components/StatCard';
 import { getGeneralMetrics, getAllCategoryStats } from '../../../lib/tauri/commands';
 import type { GeneralMetrics, CategoryStats } from '../../../shared/types/common.types';
 import { formatTimeVerbose } from '../../../shared/utils/timeFormatter';
@@ -114,39 +116,8 @@ const GeneralSummaryWindow: React.FC = () => {
     : [];
 
   return (
-    <div className="h-screen w-screen relative flex flex-col overflow-hidden font-sans">
-      {/* Background Image */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: 'url(/assets/image/background.jpg)',
-          backgroundSize: 'auto',
-          backgroundRepeat: 'repeat',
-        }}
-      />
-      {/* Dark overlay for better contrast */}
-      <div className="fixed inset-0 z-0 bg-black/40" />
-
-      {/* Custom Title Bar */}
-      <div className="relative z-10 flex items-center justify-between px-4 py-3 bg-glass-primary backdrop-blur-md border-b border-glass-border text-white cursor-move flex-shrink-0" data-tauri-drag-region>
-        <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
-          <span className="font-semibold">General Summary</span>
-        </div>
-        <button
-          type="button"
-          aria-label="Close window"
-          onClick={handleClose}
-          className="text-white/60 hover:text-white transition-colors pl-3 pointer-events-auto"
-          data-tauri-drag-region-exclude
-        >
-          <X size={20} />
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto relative z-10">
-        <div className="p-6">
-          <div className="max-w-5xl mx-auto space-y-6">
+    <WindowLayout title="General Summary" onClose={handleClose}>
+      <div className="max-w-5xl mx-auto space-y-6">
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between glass-panel p-4">
               <div>
                 <h1 className="text-2xl font-bold text-white">
@@ -181,10 +152,7 @@ const GeneralSummaryWindow: React.FC = () => {
             <section>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {cards.map((card) => (
-                  <div key={card.title} className="glass-panel p-5">
-                    <p className="text-sm font-medium text-white/60">{card.title}</p>
-                    <p className="mt-2 text-2xl font-semibold text-white">{card.value}</p>
-                  </div>
+                  <StatCard key={card.title} label={card.title} value={card.value} />
                 ))}
               </div>
             </section>
@@ -329,10 +297,8 @@ const GeneralSummaryWindow: React.FC = () => {
             </section>
           </div>
         )}
-          </div>
-        </div>
       </div>
-    </div>
+    </WindowLayout>
   );
 };
 
