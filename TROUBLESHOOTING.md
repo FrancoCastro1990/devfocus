@@ -60,6 +60,51 @@
 
 **Solución**: Ya se agregó `#[serde(rename_all = "camelCase")]` a los modelos de Rust
 
+## Problema: El modal no aparece por encima del contenido
+
+### Síntomas:
+- Los dialogs de confirmación aparecen detrás del contenido
+- No se puede hacer clic en los botones del modal
+
+### Solución:
+El componente `Modal` usa React Portal para renderizar en `document.body`:
+
+```typescript
+import { createPortal } from 'react-dom';
+
+return createPortal(modalContent, document.body);
+```
+
+Esto garantiza que el modal siempre aparezca en la capa superior con `z-index: 9999`.
+
+## Problema: Las animaciones de borde no se ven
+
+### Síntomas:
+- Los tasks/subtasks en estado "in_progress" no muestran el efecto de sweep
+- No hay animación visible cada 5 segundos
+
+### Diagnóstico:
+1. Verifica que el elemento tenga `overflow-hidden`:
+```tsx
+<div className="relative overflow-hidden ...">
+```
+
+2. Verifica que el estado sea correcto:
+```tsx
+{status === 'in_progress' && borderPulse && (
+  <div className="absolute inset-0 animate-border-sweep" />
+)}
+```
+
+3. Verifica que la animación CSS esté definida en `index.css`:
+```css
+@keyframes border-sweep {
+  0% { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); opacity: 0; }
+  50% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); opacity: 1; }
+  100% { clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%); opacity: 0; }
+}
+```
+
 ## Problema: No se puede cambiar el estado de la tarea
 
 ### Síntomas:

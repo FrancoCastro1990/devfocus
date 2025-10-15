@@ -187,6 +187,9 @@ XP for Next Level = (current_level)² × 100
    - Click "Create new category" to add a custom one
    - Pick a color for your new category
 4. **Start** - Begin tracking time for a subtask
+   - Opens a floating tracker window with clean timer display
+   - Shows real-time XP accumulation with subtle pulse animation
+   - Subtask card displays animated border sweep effect every 5 seconds
 5. **Pause** - Temporarily stop the timer (preserves accumulated time)
 6. **Resume** - Continue tracking from where you paused
 7. **Done** - Complete the subtask and earn XP (if categorized)
@@ -231,9 +234,10 @@ XP for Next Level = (current_level)² × 100
 ### Active Subtask Indicator
 
 In the main task list, tasks with active subtasks display:
-- Blue background matching "In Progress" tasks
+- Purple gradient background matching "In Progress" tasks
 - Animated pulsing circle indicator
 - "Working on: [subtask name]" label
+- **Animated border sweep effect** every 5 seconds (subtle light moving across the border)
 
 ### Viewing Metrics
 

@@ -399,12 +399,17 @@ export const Input: React.FC<InputProps> = ({
 
 ### Modal.tsx
 
+**Uses React Portal for proper layering:**
+
 ```typescript
+import { createPortal } from 'react-dom';
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: string;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -412,36 +417,43 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   title,
   children,
+  size = 'md',
 }) => {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black bg-opacity-50"
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-2xl font-bold">{title}</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              ×
+      {/* Modal Content */}
+      <div className={`relative glass-panel ${sizeClasses[size]} w-full m-4`}>
+        {title && (
+          <div className="flex items-center justify-between p-6 border-b">
+            <h2 className="text-xl font-sans font-semibold">{title}</h2>
+            <button onClick={onClose}>
+              <X size={24} />
             </button>
           </div>
-          {children}
-        </div>
+        )}
+        <div className="p-6">{children}</div>
       </div>
     </div>
   );
+
+  // Render modal at document.body level using Portal
+  return createPortal(modalContent, document.body);
 };
 ```
+
+**Key Features:**
+- Uses `createPortal` to render outside component hierarchy
+- Always appears on top with `z-[9999]`
+- Prevents event propagation issues
+- Proper backdrop blur and glass effects
 
 ---
 
@@ -1124,6 +1136,91 @@ npm run test:coverage # Con coverage
 ```
 
 ---
+
+## Animaciones y Efectos Visuales
+
+### Border Sweep Animation
+
+**Efecto sutil en tasks/subtasks activos:**
+
+```typescript
+// En TaskCard.tsx y SubtaskItem.tsx
+const [borderPulse, setBorderPulse] = useState(false);
+
+useEffect(() => {
+  if (status !== 'in_progress') return;
+
+  const interval = setInterval(() => {
+    setBorderPulse(true);
+    setTimeout(() => setBorderPulse(false), 400);
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, [status]);
+
+// En el render
+<div className="relative overflow-hidden ...">
+  {status === 'in_progress' && borderPulse && (
+    <div
+      className="absolute inset-0 rounded-xl animate-border-sweep"
+      style={{
+        border: '2px solid rgba(167, 139, 250, 0.8)',
+        opacity: 0.6,
+      }}
+    />
+  )}
+  <div className="relative z-10">{/* contenido */}</div>
+</div>
+```
+
+**CSS Animation:**
+```css
+@keyframes border-sweep {
+  0% {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    opacity: 0;
+  }
+  50% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+    opacity: 0;
+  }
+}
+```
+
+### XP Pulse Animation
+
+**Efecto en SubtaskTrackerWindow:**
+
+```typescript
+const [xpPulse, setXpPulse] = useState(false);
+
+useEffect(() => {
+  if (!categoryName || isPaused) return;
+
+  const interval = setInterval(() => {
+    setXpPulse(true);
+    setTimeout(() => setXpPulse(false), 400);
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, [categoryName, isPaused]);
+
+// Badge con efecto de glow
+<div
+  className={`transition-all duration-200`}
+  style={{
+    boxShadow: xpPulse 
+      ? `0 0 30px ${color}50, 0 4px 20px ${color}30`
+      : `0 4px 16px ${color}15`,
+  }}
+>
+  {/* Contenido */}
+</div>
+```
 
 ## Performance
 

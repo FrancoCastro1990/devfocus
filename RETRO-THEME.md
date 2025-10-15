@@ -229,10 +229,53 @@ import { Trophy, Zap, Clock } from 'lucide-react';
 |-----------|----------|-------|
 | `flicker` | 3s | Screen flicker effect |
 | `blink` | 1s | Cursor blink |
-| `float-up` | 2s | XP gain notification |
+| `float-up` | 2s | XP gain notification (legacy) |
+| `xp-popup` | 2s | XP popup fade in/out (legacy) |
+| `border-sweep` | 0.4s | Animated border on active items |
 | `ping` | 1s | Active indicator |
 
 ---
+
+## ✨ Visual Effects
+
+### Border Sweep Animation
+
+**Applied to active tasks and subtasks:**
+
+```css
+.animate-border-sweep {
+  animation: border-sweep 0.4s ease-out forwards;
+}
+
+@keyframes border-sweep {
+  0% {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    opacity: 0;
+  }
+  50% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+    opacity: 0;
+  }
+}
+```
+
+**When it triggers:**
+- Every 5 seconds on tasks with status `in_progress`
+- Every 5 seconds on subtasks with status `in_progress`
+- Creates a light sweep effect from left to right
+- Duration: 400ms with smooth ease-out
+
+### XP Pulse Effect
+
+**Applied to category badge in tracker window:**
+- Triggers every 5 seconds while actively working
+- Subtle glow effect with category color
+- Text briefly becomes brighter (white) and bold
+- Indicates XP accumulation without being intrusive
 
 ## 🔧 Customization
 
@@ -316,21 +359,23 @@ body::before {
 
 - `src/lib/theme/retro-theme.ts` - Theme configuration
 - `tailwind.config.js` - Tailwind theme extensions
-- `src/index.css` - Global retro styles
+- `src/index.css` - Global retro styles + border-sweep animation
 
 ### Component Updates
 
 **Shared Components:**
 - `src/shared/components/Button.tsx`
 - `src/shared/components/Input.tsx`
-- `src/shared/components/Modal.tsx`
-- `src/shared/components/ConfirmDialog.tsx`
+- `src/shared/components/Modal.tsx` - **Uses React Portal for proper layering**
+- `src/shared/components/ConfirmDialog.tsx` - **Fixed event propagation**
 
 **Feature Components:**
 - `src/App.tsx`
 - `src/features/tasks/components/TaskList.tsx`
-- `src/features/tasks/components/TaskCard.tsx`
+- `src/features/tasks/components/TaskCard.tsx` - **Animated border sweep on in_progress**
 - `src/features/subtasks/components/SubtaskList.tsx`
+- `src/features/subtasks/components/SubtaskItem.tsx` - **Animated border sweep on in_progress**
+- `src/features/timer/components/SubtaskTrackerWindow.tsx` - **Liquid glass redesign + XP pulse**
 - `src/features/user-profile/components/GlobalLevelHeader.tsx`
 
 ---
