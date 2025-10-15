@@ -1,4 +1,5 @@
 import React from 'react';
+import { TrendingUp } from 'lucide-react';
 import type { CategoryStats } from '../../../shared/types/common.types';
 
 interface CategoryCardProps {
@@ -14,45 +15,62 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ stats }) => {
   const xpNeededForNext = xpForNextLevel - currentLevelXp;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-5 border-2 transition-all hover:shadow-md" style={{ borderColor: `${category.color}40` }}>
+    <div
+      className="glass-panel p-5 transition-all hover:shadow-glass-lg font-sans"
+      style={{
+        borderColor: `${category.color}40`,
+      }}
+    >
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-lg"
-            style={{ backgroundColor: category.color }}
+            className="w-12 h-12 border rounded-xl flex items-center justify-center font-bold text-lg backdrop-blur-md"
+            style={{
+              backgroundColor: `${category.color}20`,
+              borderColor: `${category.color}60`,
+              color: category.color,
+            }}
           >
             {level}
           </div>
           <div>
-            <h3 className="text-lg font-semibold capitalize" style={{ color: category.color }}>
+            <h3
+              className="text-lg font-semibold"
+              style={{
+                color: category.color,
+              }}
+            >
               {category.name}
             </h3>
-            <p className="text-xs text-gray-500">Level {level}</p>
+            <p className="text-xs text-white/60">Level {level}</p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-gray-900">{totalXp.toLocaleString()}</p>
-          <p className="text-xs text-gray-500">Total XP</p>
+          <p className="text-2xl font-bold text-white">{totalXp.toLocaleString()}</p>
+          <p className="text-xs text-white/60">Total XP</p>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-1">
-        <div className="flex justify-between text-xs text-gray-600">
+      <div className="space-y-2 mt-4">
+        <div className="flex justify-between text-xs text-white/60 font-sans">
           <span>{xpInCurrentLevel.toLocaleString()} XP</span>
-          <span>{xpNeededForNext.toLocaleString()} XP to Level {level + 1}</span>
+          <span className="flex items-center gap-1">
+            <TrendingUp size={12} />
+            {xpNeededForNext.toLocaleString()} to Lvl {level + 1}
+          </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-white/5 border border-white/10 h-4 overflow-hidden rounded-lg">
           <div
-            className="h-full rounded-full transition-all duration-500 ease-out"
+            className="h-full transition-all duration-500 ease-out"
             style={{
               width: `${progressPercentage}%`,
               backgroundColor: category.color,
             }}
           />
         </div>
-        <div className="text-right text-xs font-medium" style={{ color: category.color }}>
-          {progressPercentage.toFixed(1)}%
+        <div className="text-right text-xs font-bold font-sans" style={{ color: category.color }}>
+          {progressPercentage.toFixed(1)}% Complete
         </div>
       </div>
     </div>

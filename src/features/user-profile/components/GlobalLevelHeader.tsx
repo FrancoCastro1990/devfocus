@@ -1,25 +1,26 @@
 import React from 'react';
+import { Trophy, Zap } from 'lucide-react';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { StreakIndicator } from './StreakIndicator';
 
 const TITLE_COLORS: Record<string, string> = {
-  novice: '#6b7280',    // Gray
-  junior: '#3b82f6',    // Blue
-  mid: '#8b5cf6',       // Purple
-  senior: '#10b981',    // Green
-  expert: '#f59e0b',    // Amber
-  master: '#ef4444',    // Red
+  novice: '#a78bfa',    // Purple
+  junior: '#8b5cf6',    // Violet
+  mid: '#7c3aed',       // Purple
+  senior: '#6366f1',    // Indigo
+  expert: '#3b82f6',    // Blue
+  master: '#06b6d4',    // Cyan
   legend: '#ec4899',    // Pink
 };
 
 const TITLE_LABELS: Record<string, string> = {
   novice: 'Novice',
-  junior: 'Junior Developer',
-  mid: 'Mid Developer',
-  senior: 'Senior Developer',
-  expert: 'Expert Developer',
-  master: 'Master Developer',
-  legend: 'Legendary Developer',
+  junior: 'Junior Dev',
+  mid: 'Mid-Level Dev',
+  senior: 'Senior Dev',
+  expert: 'Expert Dev',
+  master: 'Master Dev',
+  legend: 'Legend',
 };
 
 export const GlobalLevelHeader: React.FC = () => {
@@ -27,10 +28,10 @@ export const GlobalLevelHeader: React.FC = () => {
 
   if (loading || !userProfile) {
     return (
-      <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg shadow-lg p-6 mb-8">
+      <div className="glass-panel p-6 mb-8">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-700 rounded w-1/3 mb-2"></div>
-          <div className="h-4 bg-gray-700 rounded w-1/4"></div>
+          <div className="h-8 bg-white/10 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-white/10 rounded w-1/4"></div>
         </div>
       </div>
     );
@@ -40,59 +41,70 @@ export const GlobalLevelHeader: React.FC = () => {
   const titleLabel = TITLE_LABELS[userProfile.currentTitle] || 'Developer';
 
   return (
-    <div
-      className="bg-gradient-to-r rounded-lg shadow-lg p-6 mb-8 text-white"
-      style={{
-        background: `linear-gradient(135deg, ${titleColor}dd 0%, ${titleColor}aa 100%)`,
-      }}
-    >
-      <div className="flex items-center justify-between">
+    <div className="glass-panel p-6 mb-8 relative overflow-hidden">
+      <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
           {/* Level Badge */}
           <div
-            className="w-16 h-16 rounded-full flex items-center justify-center font-bold text-white text-2xl border-4 border-white shadow-lg"
-            style={{ backgroundColor: titleColor }}
+            className="w-16 h-16 flex items-center justify-center font-sans font-bold text-2xl border-2 rounded-2xl backdrop-blur-md"
+            style={{
+              borderColor: titleColor,
+              color: titleColor,
+              backgroundColor: `${titleColor}20`,
+            }}
           >
             {userProfile.level}
           </div>
 
           {/* Title and XP Info */}
           <div>
-            <h2 className="text-2xl font-bold">{titleLabel}</h2>
-            <p className="text-sm opacity-90">Level {userProfile.level}</p>
+            <div className="flex items-center gap-2">
+              <Trophy size={20} style={{ color: titleColor }} />
+              <h2 className="text-2xl font-sans font-bold" style={{ color: titleColor }}>
+                {titleLabel}
+              </h2>
+            </div>
+            <p className="text-sm font-sans text-white/60 mt-1">
+              Level {userProfile.level}
+            </p>
           </div>
         </div>
 
         {/* Total XP */}
         <div className="text-right">
-          <p className="text-3xl font-bold">{userProfile.totalXp.toLocaleString()}</p>
-          <p className="text-sm opacity-90">Total XP</p>
+          <div className="flex items-center justify-end gap-2">
+            <Zap size={24} className="text-accent-pink" />
+            <p className="text-3xl font-sans font-bold text-white">
+              {userProfile.totalXp.toLocaleString()}
+            </p>
+          </div>
+          <p className="text-sm font-sans text-white/60">Total XP</p>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="mt-4 space-y-1">
-        <div className="flex justify-between text-sm opacity-90">
-          <span>Level {userProfile.level}</span>
-          <span>Level {userProfile.level + 1}</span>
+      <div className="mt-4 space-y-1 relative z-10">
+        <div className="flex justify-between text-sm font-sans text-white/60">
+          <span>LVL {userProfile.level}</span>
+          <span>LVL {userProfile.level + 1}</span>
         </div>
-        <div className="w-full bg-black bg-opacity-20 rounded-full h-4 overflow-hidden border border-white border-opacity-20">
+        <div className="w-full bg-white/5 h-4 overflow-hidden border border-white/10 rounded-lg">
           <div
-            className="h-full bg-white rounded-full transition-all duration-500 ease-out"
+            className="h-full transition-all duration-500 ease-out"
             style={{
               width: `${userProfile.progressPercentage}%`,
-              boxShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
+              backgroundColor: titleColor,
             }}
           />
         </div>
-        <div className="text-right text-sm font-medium">
-          {userProfile.progressPercentage.toFixed(1)}% • {userProfile.xpForNextLevel.toLocaleString()} XP to next level
+        <div className="text-right text-sm font-sans font-medium text-white/80">
+          {userProfile.progressPercentage.toFixed(1)}% • {userProfile.xpForNextLevel.toLocaleString()} XP needed
         </div>
       </div>
 
       {/* Streak Indicator */}
       {userProfile.currentStreak > 0 && (
-        <div className="mt-4">
+        <div className="mt-4 relative z-10">
           <StreakIndicator
             currentStreak={userProfile.currentStreak}
             longestStreak={userProfile.longestStreak}

@@ -14,9 +14,10 @@ export const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category, size = '
 
   return (
     <span
-      className={`inline-flex items-center rounded-full font-medium ${sizeClasses[size]}`}
+      className={`inline-flex items-center font-sans font-medium border rounded-lg backdrop-blur-sm ${sizeClasses[size]}`}
       style={{
-        backgroundColor: `${category.color}20`,
+        backgroundColor: `${category.color}15`,
+        borderColor: `${category.color}60`,
         color: category.color,
       }}
     >

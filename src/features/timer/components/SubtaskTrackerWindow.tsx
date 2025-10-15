@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pause, Play, CheckCircle2, X } from 'lucide-react';
 import { pauseSubtask, resumeSubtask, completeSubtask } from '../../../lib/tauri/commands';
 import { formatTime } from '../../../shared/utils/timeFormatter';
 import { emit, listen } from '@tauri-apps/api/event';
@@ -167,47 +168,47 @@ const SubtaskTrackerWindow: React.FC = () => {
   const formattedTime = formatTime(seconds);
 
   return (
-    <div className="h-screen w-screen bg-gray-900 text-white select-none flex flex-col overflow-hidden">
-      <div className="relative flex items-center justify-between px-3 py-2.5 text-sm bg-gray-800 cursor-move flex-shrink-0" data-tauri-drag-region>
+    <div className="h-screen w-screen bg-gradient-to-br from-[#0f0f23] to-[#1a1a2e] text-white select-none flex flex-col overflow-hidden font-sans border-2 border-accent-purple/30 relative">
+      <div className="relative flex items-center justify-between px-3 py-2.5 text-sm bg-glass-primary backdrop-blur-md border-b border-glass-border cursor-move flex-shrink-0 z-20" data-tauri-drag-region>
         <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
-          <span aria-hidden className="text-lg leading-none text-gray-400">⋮⋮</span>
-          <span className="font-semibold truncate">{title}</span>
+          <span className="font-semibold truncate text-white">{title}</span>
         </div>
         <button
           type="button"
           aria-label="Close tracker"
           onClick={handleClose}
-          className="text-gray-400 hover:text-white transition-colors pl-3 text-xl leading-none pointer-events-auto"
+          className="text-white/60 hover:text-white transition-colors pl-3 pointer-events-auto"
           data-tauri-drag-region-exclude
         >
-          ×
+          <X size={20} />
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 min-h-0">
-        <div className="text-4xl font-bold tracking-widest">
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 min-h-0 z-20">
+        <div className="text-5xl font-bold tracking-wider text-white">
           {formattedTime}
         </div>
 
         {categoryName && categoryColor && (
           <div className="flex items-center gap-2 text-sm">
             <span
-              className="px-3 py-1 rounded-full font-medium text-xs"
+              className="px-3 py-1 border font-sans font-medium text-xs rounded-lg backdrop-blur-sm"
               style={{
-                backgroundColor: `${categoryColor}30`,
+                backgroundColor: `${categoryColor}15`,
+                borderColor: `${categoryColor}60`,
                 color: categoryColor,
               }}
             >
               {categoryName}
             </span>
-            <span className="text-gray-300 text-xs">
+            <span className="text-white/60 text-xs font-sans">
               +{seconds} XP
             </span>
           </div>
         )}
 
         {error && (
-          <div className="text-xs text-red-400 text-center">
+          <div className="text-xs text-red-300 text-center font-sans border border-red-400/40 bg-red-500/20 rounded-lg px-3 py-1">
             {error}
           </div>
         )}
@@ -217,17 +218,28 @@ const SubtaskTrackerWindow: React.FC = () => {
             type="button"
             onClick={handlePauseResume}
             disabled={loading}
-            className="px-4 py-2 text-sm rounded-md bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="glass-button flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPaused ? 'Resume' : 'Pause'}
+            {isPaused ? (
+              <>
+                <Play size={16} />
+                <span>Resume</span>
+              </>
+            ) : (
+              <>
+                <Pause size={16} />
+                <span>Pause</span>
+              </>
+            )}
           </button>
           <button
             type="button"
             onClick={handleDone}
             disabled={loading}
-            className="px-4 py-2 text-sm rounded-md bg-green-600 hover:bg-green-500 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="glass-button flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Done
+            <CheckCircle2 size={16} />
+            <span>Done</span>
           </button>
         </div>
       </div>
@@ -245,13 +257,14 @@ const SubtaskTrackerWindow: React.FC = () => {
                 }}
               >
                 <div
-                  className="px-3 py-1.5 rounded-full font-bold text-white shadow-lg text-sm"
+                  className="px-3 py-1.5 border font-sans font-bold text-sm rounded-xl backdrop-blur-md"
                   style={{
-                    backgroundColor: gain.categoryColor,
-                    boxShadow: `0 4px 12px ${gain.categoryColor}40`,
+                    borderColor: `${gain.categoryColor}60`,
+                    color: gain.categoryColor,
+                    backgroundColor: `${gain.categoryColor}15`,
                   }}
                 >
-                  +{gain.xpAmount} XP {gain.categoryName}
+                  +{gain.xpAmount} XP [{gain.categoryName}]
                 </div>
               </div>
             ))}

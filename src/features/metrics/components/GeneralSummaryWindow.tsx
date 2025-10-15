@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { X, RefreshCw, TrendingUp, Award, Target } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
 import { getGeneralMetrics, getAllCategoryStats } from '../../../lib/tauri/commands';
 import type { GeneralMetrics, CategoryStats } from '../../../shared/types/common.types';
@@ -113,49 +114,64 @@ const GeneralSummaryWindow: React.FC = () => {
     : [];
 
   return (
-    <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div className="h-screen w-screen relative flex flex-col overflow-hidden font-sans">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/assets/image/background.jpg)',
+          backgroundSize: 'auto',
+          backgroundRepeat: 'repeat',
+        }}
+      />
+      {/* Dark overlay for better contrast */}
+      <div className="fixed inset-0 z-0 bg-black/40" />
+
       {/* Custom Title Bar */}
-      <div className="relative flex items-center justify-between px-4 py-3 bg-gray-800 text-white cursor-move flex-shrink-0" data-tauri-drag-region>
+      <div className="relative z-10 flex items-center justify-between px-4 py-3 bg-glass-primary backdrop-blur-md border-b border-glass-border text-white cursor-move flex-shrink-0" data-tauri-drag-region>
         <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
-          <span aria-hidden className="text-lg leading-none text-gray-400">⋮⋮</span>
           <span className="font-semibold">General Summary</span>
         </div>
         <button
           type="button"
           aria-label="Close window"
           onClick={handleClose}
-          className="text-gray-400 hover:text-white transition-colors pl-3 text-2xl leading-none pointer-events-auto"
+          className="text-white/60 hover:text-white transition-colors pl-3 pointer-events-auto"
           data-tauri-drag-region-exclude
         >
-          ×
+          <X size={20} />
         </button>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto relative z-10">
         <div className="p-6">
           <div className="max-w-5xl mx-auto space-y-6">
-            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between glass-panel p-4">
               <div>
-                <p className="text-gray-600 mt-1">
-                  Review your cumulative points and recent subtask activity at a glance.
+                <h1 className="text-2xl font-bold text-white">
+                  Metrics Dashboard
+                </h1>
+                <p className="text-white/60 mt-1 text-sm">
+                  Cumulative stats and activity
                 </p>
               </div>
               <div className="flex">
                 <Button variant="secondary" onClick={fetchMetrics} disabled={loading}>
-                  {loading ? 'Refreshing...' : 'Refresh'}
+                  <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                  {loading ? 'Loading...' : 'Refresh'}
                 </Button>
               </div>
             </header>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          <div className="border border-red-400/40 bg-red-500/20 text-red-300 px-4 py-3 rounded-xl font-sans">
             {error}
           </div>
         )}
 
         {loading && !metrics ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center text-gray-500">
+          <div className="glass-panel p-8 text-center text-white/60">
             Loading summary...
           </div>
         ) : null}
@@ -165,9 +181,9 @@ const GeneralSummaryWindow: React.FC = () => {
             <section>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {cards.map((card) => (
-                  <div key={card.title} className="bg-white rounded-lg shadow-sm p-5">
-                    <p className="text-sm font-medium text-gray-500">{card.title}</p>
-                    <p className="mt-2 text-2xl font-semibold text-gray-900">{card.value}</p>
+                  <div key={card.title} className="glass-panel p-5">
+                    <p className="text-sm font-medium text-white/60">{card.title}</p>
+                    <p className="mt-2 text-2xl font-semibold text-white">{card.value}</p>
                   </div>
                 ))}
               </div>
@@ -175,9 +191,14 @@ const GeneralSummaryWindow: React.FC = () => {
 
             {categoryStats.length > 0 && (
               <section>
-                <div className="mb-4">
-                  <h2 className="text-2xl font-semibold text-gray-900">Categories</h2>
-                  <p className="text-gray-600 mt-1">Your skill levels and experience progress</p>
+                <div className="mb-4 glass-panel p-4">
+                  <div className="flex items-center gap-2">
+                    <Award size={24} className="text-accent-purple" />
+                    <h2 className="text-2xl font-semibold text-white">
+                      Categories
+                    </h2>
+                  </div>
+                  <p className="text-white/60 mt-1 text-sm">Skill levels & XP progress</p>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {categoryStats.map((stats) => (
@@ -188,43 +209,49 @@ const GeneralSummaryWindow: React.FC = () => {
             )}
 
             <section className="grid gap-4 md:grid-cols-2">
-              <div className="bg-white rounded-lg shadow-sm p-5">
-                <h2 className="text-lg font-semibold text-gray-900">Best day</h2>
+              <div className="glass-panel p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp size={20} className="text-accent-pink" />
+                  <h2 className="text-lg font-semibold text-white">Best Day</h2>
+                </div>
                 {metrics.bestDay ? (
                   <div className="mt-3 space-y-2">
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-3xl font-bold text-accent-pink font-sans">
                       {metrics.bestDay.points.toLocaleString()} pts
                     </p>
-                    <p className="text-gray-600">{toLongDate(metrics.bestDay.date)}</p>
-                    <p className="text-sm text-gray-500">
-                      Subtasks completed: {metrics.bestDay.subtasksCompleted.toLocaleString()}
+                    <p className="text-white/60 font-sans text-sm">{toLongDate(metrics.bestDay.date)}</p>
+                    <p className="text-sm text-white/50 font-sans">
+                      Subtasks: {metrics.bestDay.subtasksCompleted.toLocaleString()}
                     </p>
                   </div>
                 ) : (
-                  <p className="text-gray-500 mt-3">Not enough data yet.</p>
+                  <p className="text-white/50 mt-3 font-sans text-sm">Not enough data yet.</p>
                 )}
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm p-5">
-                <h2 className="text-lg font-semibold text-gray-900">Recent activity</h2>
-                <p className="text-sm text-gray-500 mt-2">
-                  Summary of the last 7 days including today.
+              <div className="glass-panel p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Target size={20} className="text-accent-blue" />
+                  <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
+                </div>
+                <p className="text-sm text-white/50 mt-2 font-sans">
+                  Last 7 days
                 </p>
                 <div className="mt-4 -mx-4 overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-full divide-y divide-white/10">
                     <thead>
-                      <tr className="text-left text-sm text-gray-500">
-                        <th className="px-4 py-2">Day</th>
-                        <th className="px-4 py-2">Points</th>
-                        <th className="px-4 py-2">Subtasks</th>
+                      <tr className="text-left text-sm text-white/60">
+                        <th className="px-4 py-2 font-sans">Day</th>
+                        <th className="px-4 py-2 font-sans">Points</th>
+                        <th className="px-4 py-2 font-sans">Subs</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
+                    <tbody className="divide-y divide-white/5 text-sm text-white/80">
                       {metrics.pointsLast7Days.map((day) => (
-                        <tr key={day.date}>
-                          <td className="px-4 py-2">{toReadableDate(day.date)}</td>
-                          <td className="px-4 py-2 font-medium">{day.points.toLocaleString()}</td>
-                          <td className="px-4 py-2">{day.subtasksCompleted.toLocaleString()}</td>
+                        <tr key={day.date} className="hover:bg-white/5">
+                          <td className="px-4 py-2 font-sans">{toReadableDate(day.date)}</td>
+                          <td className="px-4 py-2 font-medium font-sans text-white">{day.points.toLocaleString()}</td>
+                          <td className="px-4 py-2 font-sans">{day.subtasksCompleted.toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -233,19 +260,43 @@ const GeneralSummaryWindow: React.FC = () => {
               </div>
             </section>
 
-            <section className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Points vs. subtasks</h2>
-                <p className="text-sm text-gray-500">Distribution across the last 7 days</p>
+            <section className="glass-panel p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+                <h2 className="text-lg font-semibold text-white font-sans">
+                  Points vs Subtasks
+                </h2>
+                <p className="text-sm text-white/60 font-sans">Last 7 days</p>
               </div>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="dateLabel" />
-                    <YAxis yAxisId="left" allowDecimals={false} />
-                    <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" opacity={0.3} />
+                    <XAxis
+                      dataKey="dateLabel"
+                      stroke="#ffffff80"
+                      style={{ fontFamily: 'sans-serif', fontSize: '12px' }}
+                    />
+                    <YAxis
+                      yAxisId="left"
+                      allowDecimals={false}
+                      stroke="#ffffff80"
+                      style={{ fontFamily: 'sans-serif', fontSize: '12px' }}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      allowDecimals={false}
+                      stroke="#a78bfa"
+                      style={{ fontFamily: 'sans-serif', fontSize: '12px' }}
+                    />
                     <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(15, 15, 35, 0.95)',
+                        border: '1px solid rgba(167, 139, 250, 0.4)',
+                        borderRadius: '12px',
+                        fontFamily: 'sans-serif',
+                        color: '#ffffff'
+                      }}
                       formatter={(value: number, name) => {
                         if (name === 'Subtasks') {
                           return [value.toLocaleString(), 'Subtasks'];
@@ -253,12 +304,14 @@ const GeneralSummaryWindow: React.FC = () => {
                         return [`${value.toLocaleString()} pts`, 'Points'];
                       }}
                     />
-                    <Legend />
+                    <Legend
+                      wrapperStyle={{ fontFamily: 'sans-serif', color: '#ffffff' }}
+                    />
                     <Bar
                       yAxisId="left"
                       dataKey="points"
                       name="Points"
-                      fill="#3b82f6"
+                      fill="#8b5cf6"
                       radius={[4, 4, 0, 0]}
                     />
                     <Line
@@ -266,9 +319,9 @@ const GeneralSummaryWindow: React.FC = () => {
                       type="monotone"
                       dataKey="subtasks"
                       name="Subtasks"
-                      stroke="#f97316"
+                      stroke="#a78bfa"
                       strokeWidth={2}
-                      dot={{ r: 3 }}
+                      dot={{ r: 3, fill: '#a78bfa' }}
                     />
                   </ComposedChart>
                 </ResponsiveContainer>

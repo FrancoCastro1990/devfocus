@@ -1,4 +1,5 @@
 import React from 'react';
+import { Play, Pause, CheckCircle2, X } from 'lucide-react';
 import type { Subtask, TimeSession } from '../../../shared/types/common.types';
 import { useTimer } from '../../timer/hooks/useTimer';
 import { formatTime } from '../../../shared/utils/timeFormatter';
@@ -71,10 +72,10 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
   });
 
   const statusColors = {
-    todo: 'bg-gray-100 border-gray-300',
-    in_progress: 'bg-blue-100 border-blue-400',
-    paused: 'bg-yellow-100 border-yellow-400',
-    done: 'bg-green-100 border-green-400',
+    todo: 'bg-status-todo border-status-todo-border',
+    in_progress: 'bg-status-in-progress border-status-in-progress-border shadow-glass',
+    paused: 'bg-accent-indigo/10 border-accent-indigo/40',
+    done: 'bg-status-done border-status-done-border',
   };
 
   const renderActions = () => {
@@ -109,9 +110,12 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
         );
       case 'done':
         return (
-          <span className="text-sm text-green-700 font-medium">
-            ✓ Completed
-          </span>
+          <div className="flex items-center gap-1">
+            <CheckCircle2 size={16} className="text-accent-emerald" />
+            <span className="text-sm text-white/80 font-sans font-medium">
+              Done
+            </span>
+          </div>
         );
       default:
         return null;
@@ -122,16 +126,19 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
   const showTimer = (subtask.status !== 'todo' || (session && session.durationSeconds > 0)) && session !== null;
 
   return (
-    <div className={`p-4 border-2 rounded-lg transition-all ${statusColors[subtask.status]}`}>
+    <div className={`p-4 border rounded-xl transition-all backdrop-blur-md font-sans ${statusColors[subtask.status]}`}>
       <div className="flex justify-between items-center">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-medium">{subtask.title}</h4>
+            {subtask.status === 'in_progress' && <Play size={16} className="text-accent-purple animate-pulse" />}
+            {subtask.status === 'paused' && <Pause size={16} className="text-accent-indigo" />}
+            {subtask.status === 'done' && <CheckCircle2 size={16} className="text-accent-emerald" />}
+            <h4 className="font-medium text-white">{subtask.title}</h4>
             {subtask.category && <CategoryBadge category={subtask.category} />}
           </div>
           {showTimer && (
-            <p className="text-2xl font-mono font-bold mt-2">
-              {formatTime(seconds)} ({seconds}s)
+            <p className="text-2xl font-sans font-bold mt-2 text-white">
+              {formatTime(seconds)}
             </p>
           )}
         </div>
@@ -140,22 +147,10 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
           {subtask.status !== 'done' && (
             <button
               onClick={onDelete}
-              className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors ml-2"
+              className="p-1.5 text-red-300 hover:bg-red-500/20 border border-transparent hover:border-red-400/40 rounded-lg transition-colors ml-2"
               title="Delete subtask"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X size={16} />
             </button>
           )}
         </div>

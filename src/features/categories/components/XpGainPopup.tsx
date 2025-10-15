@@ -32,13 +32,14 @@ export const XpGainPopup: React.FC = () => {
             }}
           >
             <div
-              className="px-4 py-2 rounded-full font-bold text-white shadow-lg"
+              className="px-4 py-2 border font-sans font-bold rounded-xl backdrop-blur-md"
               style={{
-                backgroundColor: gain.categoryColor,
-                boxShadow: `0 4px 12px ${gain.categoryColor}40`,
+                borderColor: `${gain.categoryColor}60`,
+                color: gain.categoryColor,
+                backgroundColor: `${gain.categoryColor}15`,
               }}
             >
-              +{gain.xpAmount} XP {gain.categoryName}
+              +{gain.xpAmount} XP [{gain.categoryName}]
             </div>
           </div>
         ))}

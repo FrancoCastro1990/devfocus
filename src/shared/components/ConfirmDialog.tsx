@@ -33,7 +33,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
       <div className="space-y-4">
-        <p className="text-gray-700">{message}</p>
+        <p className="text-white/90 font-sans">{message}</p>
 
         {children && <div className="mt-4">{children}</div>}
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Flame, AlertTriangle } from 'lucide-react';
 
 interface StreakIndicatorProps {
   currentStreak: number;
@@ -21,20 +22,20 @@ export const StreakIndicator: React.FC<StreakIndicatorProps> = ({
 
   return (
     <div
-      className={`p-4 rounded-lg border-2 transition-all ${
+      className={`p-4 border rounded-2xl transition-all backdrop-blur-md font-sans ${
         isAtRisk
-          ? 'border-red-500 bg-red-50'
-          : 'border-orange-500 bg-orange-50'
+          ? 'border-red-400/40 bg-red-500/10'
+          : 'border-accent-pink/40 bg-accent-pink/10'
       }`}
     >
       <div className="flex items-center gap-3 mb-2">
-        <span className="text-3xl animate-pulse">🔥</span>
+        <Flame className="text-accent-pink animate-pulse" size={32} />
         <div>
-          <div className="text-2xl font-bold text-gray-900">
+          <div className="text-2xl font-bold text-accent-pink">
             {currentStreak} Day Streak!
           </div>
           {bonusPercentage > 0 && (
-            <div className="text-sm font-medium text-orange-600">
+            <div className="text-sm font-medium text-white/80">
               +{bonusPercentage}% XP Bonus
             </div>
           )}
@@ -42,14 +43,17 @@ export const StreakIndicator: React.FC<StreakIndicatorProps> = ({
       </div>
 
       {isAtRisk && currentStreak > 0 && (
-        <div className="mt-2 p-2 bg-red-100 rounded text-sm text-red-700 font-medium">
-          ⚠️ At risk! Complete 1 subtask today to maintain your streak.
+        <div className="mt-2 p-2 bg-red-500/20 border border-red-400/40 rounded-lg text-sm text-red-300 font-medium">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={16} />
+            <span>At risk! Complete 1 subtask today</span>
+          </div>
         </div>
       )}
 
-      <div className="mt-3 pt-3 border-t border-gray-300">
-        <div className="flex justify-between text-xs text-gray-600">
-          <span>Next milestone: {nextMilestone} days</span>
+      <div className="mt-3 pt-3 border-t border-white/10">
+        <div className="flex justify-between text-xs text-white/60">
+          <span>Next: {nextMilestone} days</span>
           <span>Best: {longestStreak} days</span>
         </div>
       </div>

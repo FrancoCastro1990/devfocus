@@ -41,9 +41,9 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onCha
 
   if (showCreateForm) {
     return (
-      <div className="space-y-3 p-3 border rounded-lg bg-gray-50">
+      <div className="space-y-3 p-3 glass-panel">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-sans font-medium text-white/80 mb-2">
             Category Name
           </label>
           <input
@@ -51,7 +51,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onCha
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
             placeholder="e.g., frontend, backend..."
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="glass-input w-full"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleCreateCategory();
@@ -60,7 +60,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onCha
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-sans font-medium text-white/80 mb-2">
             Color
           </label>
           <div className="flex gap-2 flex-wrap">
@@ -69,8 +69,8 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onCha
                 key={color}
                 type="button"
                 onClick={() => setSelectedColor(color)}
-                className={`w-8 h-8 rounded-full transition-transform ${
-                  selectedColor === color ? 'ring-2 ring-gray-900 ring-offset-2 scale-110' : ''
+                className={`w-8 h-8 border rounded-lg transition-all ${
+                  selectedColor === color ? 'border-white shadow-glass scale-110' : 'border-white/20'
                 }`}
                 style={{ backgroundColor: color }}
                 title={color}
@@ -82,7 +82,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onCha
           <button
             onClick={handleCreateCategory}
             disabled={creating || !newCategoryName.trim()}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 glass-button font-sans text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {creating ? 'Creating...' : 'Create'}
           </button>
@@ -91,7 +91,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onCha
               setShowCreateForm(false);
               setNewCategoryName('');
             }}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+            className="glass-button font-sans text-sm bg-white/5 border-white/20"
           >
             Cancel
           </button>
@@ -102,13 +102,13 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onCha
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-sans font-medium text-white/80">
         Category (optional)
       </label>
       <select
         value={value || ''}
         onChange={(e) => onChange(e.target.value || undefined)}
-        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="glass-input w-full font-sans text-sm"
       >
         <option value="">No category</option>
         {categories.map((cat) => (
@@ -120,9 +120,9 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onCha
       <button
         type="button"
         onClick={() => setShowCreateForm(true)}
-        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+        className="text-sm text-accent-purple hover:text-accent-blue font-sans font-medium transition-colors"
       >
-        + Create new category
+        + Create New Category
       </button>
     </div>
   );

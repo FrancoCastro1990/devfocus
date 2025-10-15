@@ -39,19 +39,21 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Subtasks</h3>
+      <div className="flex justify-between items-center border-b border-white/10 pb-3">
+        <h3 className="text-lg font-sans font-semibold text-white">
+          Subtasks
+        </h3>
         {!isAdding && (
           <Button size="sm" variant="primary" onClick={() => setIsAdding(true)}>
-            + Add Subtask
+            + Add
           </Button>
         )}
       </div>
 
       {isAdding && (
-        <div className="space-y-3 p-4 bg-gray-50 rounded-lg border">
+        <div className="space-y-3 p-4 glass-panel">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-sans font-medium text-white/80 mb-2">
               Subtask Title
             </label>
             <Input
@@ -75,7 +77,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
           />
           <div className="flex gap-2">
             <Button size="sm" variant="primary" onClick={handleAddSubtask} disabled={!newSubtaskTitle.trim()}>
-              Add Subtask
+              Add
             </Button>
             <Button
               size="sm"
@@ -94,8 +96,8 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
 
       <div className="space-y-3">
         {subtasksWithSessions.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">
-            No subtasks yet. Add your first subtask to get started!
+          <p className="text-center text-white/60 font-sans py-8">
+            No subtasks yet. Add one to get started!
           </p>
         ) : (
           subtasksWithSessions.map(({ subtask, session }) => (

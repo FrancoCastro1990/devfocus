@@ -1,4 +1,5 @@
 import React from 'react';
+import { FileQuestion } from 'lucide-react';
 import { TaskCard } from './TaskCard';
 import type { TaskWithActiveSubtask } from '../../../shared/types/common.types';
 
@@ -15,9 +16,14 @@ export const TaskList: React.FC<TaskListProps> = ({
 }) => {
   if (tasks.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <p className="text-lg">No tasks yet</p>
-        <p className="text-sm mt-2">Create your first task to get started!</p>
+      <div className="text-center py-12 glass-panel">
+        <FileQuestion className="mx-auto mb-4 text-white/40" size={48} />
+        <p className="text-lg font-sans text-white/80">
+          No tasks found
+        </p>
+        <p className="text-sm mt-2 font-sans text-white/50">
+          Create your first task to get started!
+        </p>
       </div>
     );
   }

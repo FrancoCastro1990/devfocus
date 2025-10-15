@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Trash2, Clock, CheckCircle2 } from 'lucide-react';
 import type { TaskWithActiveSubtask } from '../../../shared/types/common.types';
 import { formatRelativeTime } from '../../../shared/utils/dateFormatter';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
@@ -12,12 +13,6 @@ interface TaskCardProps {
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const statusColors = {
-    todo: 'bg-gray-100 border-gray-300 text-gray-700',
-    in_progress: 'bg-blue-100 border-blue-400 text-blue-900',
-    done: 'bg-green-100 border-green-400 text-green-900',
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowDeleteModal(true);
@@ -26,7 +21,18 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
   return (
     <div
       onClick={onClick}
-      className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${statusColors[task.status]}`}
+      className="
+        p-5 border border-white/18 rounded-2xl cursor-pointer
+        transition-all duration-300
+        hover:shadow-glass-lg hover:scale-[1.02] hover:border-white/25 hover:bg-white/10
+        backdrop-blur-xl bg-white/8
+        font-sans text-white
+      "
+      style={{
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+      }}
     >
       <div className="flex justify-between items-start">
         <div className="flex-1">
@@ -37,48 +43,58 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
 
           {/* Active subtask info */}
           {task.activeSubtask && (
-            <div className="mt-3 p-3 bg-blue-100 rounded-lg border-2 border-blue-400">
+            <div
+              className="mt-3 p-3 bg-accent-purple/10 border border-accent-purple/30 rounded-xl backdrop-blur-md"
+              style={{
+                backdropFilter: 'blur(16px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                boxShadow: '0 4px 16px rgba(167, 139, 250, 0.15)',
+              }}
+            >
               <div className="flex items-center gap-2">
                 <div className="relative flex items-center justify-center w-4 h-4">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full relative z-10"></div>
-                  <div className="absolute w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                  <div className="w-2 h-2 bg-accent-purple rounded-full relative z-10"></div>
+                  <div className="absolute w-2 h-2 bg-accent-purple rounded-full animate-ping"></div>
                 </div>
-                <span className="text-sm font-medium text-blue-900">
-                  Working on: {task.activeSubtask.title}
+                <Clock size={14} className="text-accent-purple" />
+                <span className="text-sm font-medium text-white">
+                  Working: {task.activeSubtask.title}
                 </span>
               </div>
             </div>
           )}
 
-          <div className="flex items-center gap-3 mt-2 text-xs opacity-60">
+          <div className="flex items-center gap-3 mt-2 text-xs text-white/50">
             <span>Created {formatRelativeTime(task.createdAt)}</span>
             {task.status === 'done' && task.completedAt && (
-              <span>• Completed {formatRelativeTime(task.completedAt)}</span>
+              <>
+                <span>•</span>
+                <CheckCircle2 size={12} className="inline" />
+                <span>Completed {formatRelativeTime(task.completedAt)}</span>
+              </>
             )}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="px-2 py-1 text-xs font-medium rounded capitalize bg-white bg-opacity-50">
+          <span
+            className="px-3 py-1 bg-white/8 border border-white/20 rounded-lg text-xs font-medium backdrop-blur-md"
+            style={{
+              backdropFilter: 'blur(12px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+            }}
+          >
             {task.status.replace('_', ' ')}
           </span>
           <button
             onClick={handleDelete}
-            className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors"
+            className="p-1.5 text-red-300 hover:bg-red-500/20 border border-transparent hover:border-red-400/40 rounded-lg transition-all backdrop-blur-sm"
             title="Delete task"
+            style={{
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+            }}
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
+            <Trash2 size={18} />
           </button>
         </div>
       </div>
@@ -94,9 +110,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
         cancelText="Cancel"
         variant="danger"
       >
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
-          <p className="font-medium">⚠️ This action cannot be undone</p>
-          <p className="mt-1 text-yellow-700">All subtasks and time sessions will be permanently deleted.</p>
+        <div className="border border-accent-pink/40 bg-accent-pink/10 p-3 text-sm text-accent-pink rounded-xl">
+          <p className="font-medium">Warning: Irreversible Action</p>
+          <p className="mt-1 text-white/60">All subtasks and time sessions will be permanently deleted.</p>
         </div>
       </ConfirmDialog>
     </div>

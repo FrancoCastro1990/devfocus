@@ -9,6 +9,7 @@ import { useTaskActions } from './features/tasks/hooks/useTaskActions';
 import { useTaskStore } from './features/tasks/store/taskStore';
 import { useSubtaskStore } from './features/subtasks/store/subtaskStore';
 import { GlobalLevelHeader } from './features/user-profile/components/GlobalLevelHeader';
+import { XpGainPopup } from './features/categories/components/XpGainPopup';
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { emitTo, listen } from '@tauri-apps/api/event';
 import * as commands from './lib/tauri/commands';
@@ -525,12 +526,33 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="h-screen w-screen relative flex flex-col overflow-hidden font-sans">
+      {/* Background Image */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/assets/image/background.jpg)',
+          backgroundSize: 'auto',
+          backgroundRepeat: 'repeat',
+        }}
+      />
+      {/* Dark overlay for better contrast */}
+      <div className="fixed inset-0 z-0 bg-black/40" />
+
+      <XpGainPopup />
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto relative z-10">
+        <div className="p-6">
+          <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">DevFocus</h1>
-          <p className="text-gray-600 mt-2">Task management with timer and points system</p>
+        <div className="mb-8 glass-panel p-6">
+          <h1 className="text-4xl font-bold text-white">
+            DevFocus
+          </h1>
+          <p className="text-white/60 mt-2 text-sm">
+            Task Management System v2.0 | Timer + XP + Gamification
+          </p>
         </div>
 
         {/* Global Level Header */}
@@ -540,23 +562,29 @@ function App() {
         {!currentTask ? (
           // Task List View
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold">Tasks</h2>
+            <div className="flex justify-between items-center mb-6 glass-panel p-4">
+              <h2 className="text-2xl font-semibold text-white">
+                Tasks
+              </h2>
               <div className="flex gap-2">
-                <Button variant="secondary" onClick={handleOpenGeneralSummary}>
-                  General Summary
+                <Button variant="secondary" size="sm" onClick={handleOpenGeneralSummary}>
+                  Summary
                 </Button>
-                <Button variant="secondary" onClick={handleMinimizeToTray}>
-                  Minimize to Tray
+                <Button variant="secondary" size="sm" onClick={handleMinimizeToTray}>
+                  Min. Tray
                 </Button>
-                <Button variant="primary" onClick={() => setShowTaskForm(true)}>
+                <Button variant="primary" size="sm" onClick={() => setShowTaskForm(true)}>
                   + New Task
                 </Button>
               </div>
             </div>
 
             {loading ? (
-              <div className="text-center py-12 text-gray-500">Loading tasks...</div>
+              <div className="text-center py-12 glass-panel">
+                <p className="text-white/60">
+                  Loading tasks...
+                </p>
+              </div>
             ) : (
               <TaskList
                 tasks={tasks}
@@ -574,23 +602,25 @@ function App() {
           <div>
             <div className="mb-6">
               <Button variant="secondary" size="sm" onClick={handleBack}>
-                ← Back to Tasks
+                ← Back
               </Button>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div className="glass-panel p-6 mb-6">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <h2 className="text-3xl font-bold text-gray-900">{currentTask.title}</h2>
+                  <h2 className="text-3xl font-bold text-white">
+                    {currentTask.title}
+                  </h2>
                   {currentTask.description && (
-                    <p className="text-gray-600 mt-2">{currentTask.description}</p>
+                    <p className="text-white/60 mt-3 text-sm">{currentTask.description}</p>
                   )}
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <select
                     value={currentTask.status}
                     onChange={(e) => handleUpdateTaskStatus(currentTask.id, e.target.value)}
-                    className="px-3 py-1 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="glass-input px-3 py-1 text-sm"
                   >
                     <option value="todo">To Do</option>
                     <option value="in_progress">In Progress</option>
@@ -606,17 +636,17 @@ function App() {
                 </div>
               </div>
               <div className="mt-4 flex gap-2">
-                <span className="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800 capitalize">
+                <span className={`status-badge ${currentTask.status === 'in_progress' ? 'status-badge-in-progress' : currentTask.status === 'done' ? 'status-badge-done' : 'status-badge-todo'} capitalize`}>
                   {currentTask.status.replace('_', ' ')}
                 </span>
-                <span className="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-800">
+                <span className="px-3 py-1 rounded-full text-sm font-medium border border-accent-pink/40 bg-accent-pink/20 text-accent-pink backdrop-blur-sm">
                   {currentTask.subtasksWithSessions.filter((s) => s.subtask.status === 'done').length}/
-                  {currentTask.subtasksWithSessions.length} subtasks completed
+                  {currentTask.subtasksWithSessions.length} done
                 </span>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="glass-panel p-6">
               <SubtaskList
                 subtasksWithSessions={currentTask.subtasksWithSessions}
                 onCreateSubtask={handleCreateSubtask}
@@ -629,6 +659,8 @@ function App() {
             </div>
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );
