@@ -168,8 +168,19 @@ const SubtaskTrackerWindow: React.FC = () => {
   const formattedTime = formatTime(seconds);
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-[#0f0f23] to-[#1a1a2e] text-white select-none flex flex-col overflow-hidden font-sans border-2 border-accent-purple/30 relative">
-      <div className="relative flex items-center justify-between px-3 py-2.5 text-sm bg-glass-primary backdrop-blur-md border-b border-glass-border cursor-move flex-shrink-0 z-20" data-tauri-drag-region>
+    <div 
+      className="h-screen w-screen text-white select-none flex flex-col overflow-hidden font-sans border-2 border-accent-purple/30 relative"
+      style={{
+        background: 'linear-gradient(135deg, rgb(15, 15, 35) 0%, rgb(26, 26, 46) 100%)',
+      }}
+    >
+      <div 
+        className="relative flex items-center justify-between px-3 py-2.5 text-sm border-b border-glass-border cursor-move flex-shrink-0 z-20" 
+        data-tauri-drag-region
+        style={{
+          background: 'rgb(70, 70, 90)',
+        }}
+      >
         <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
           <span className="font-semibold truncate text-white">{title}</span>
         </div>

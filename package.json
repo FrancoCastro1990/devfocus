@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:dev-windows": "tauri dev",
-    "tauri:dev": "env -u GTK_PATH -u LD_LIBRARY_PATH tauri dev",
+    "tauri:dev": "WEBKIT_DISABLE_COMPOSITING_MODE=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_FORCE_SANDBOX=0 GSK_RENDERER=cairo env -u GTK_PATH -u LD_LIBRARY_PATH -u SNAP -u SNAP_NAME tauri dev",
     "tauri:build": "tauri build"
   },
   "dependencies": {

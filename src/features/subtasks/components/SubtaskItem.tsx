@@ -36,25 +36,29 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
   // Status-specific styles with glow effects
   const statusStyles = {
     todo: {
-      bg: 'rgba(147, 197, 253, 0.2)',
+      bg: 'rgb(80, 115, 160)',
+      bgBlur: 'rgba(147, 197, 253, 0.2)',
       border: 'rgba(147, 197, 253, 0.4)',
       shadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
       hoverShadow: '0 0 18px rgba(147, 197, 253, 0.25)',
     },
     in_progress: {
-      bg: 'rgba(167, 139, 250, 0.2)',
+      bg: 'rgb(100, 90, 150)',
+      bgBlur: 'rgba(167, 139, 250, 0.2)',
       border: 'rgba(167, 139, 250, 0.4)',
       shadow: '0 4px 16px rgba(0, 0, 0, 0.15), 0 0 20px rgba(167, 139, 250, 0.3)',
       hoverShadow: '0 0 24px rgba(167, 139, 250, 0.35)',
     },
     paused: {
-      bg: 'rgba(129, 140, 248, 0.2)',
+      bg: 'rgb(85, 95, 145)',
+      bgBlur: 'rgba(129, 140, 248, 0.2)',
       border: 'rgba(129, 140, 248, 0.4)',
       shadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
       hoverShadow: '0 0 18px rgba(129, 140, 248, 0.25)',
     },
     done: {
-      bg: 'rgba(52, 211, 153, 0.2)',
+      bg: 'rgb(50, 120, 100)',
+      bgBlur: 'rgba(52, 211, 153, 0.2)',
       border: 'rgba(52, 211, 153, 0.4)',
       shadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
       hoverShadow: '0 0 18px rgba(52, 211, 153, 0.25)',
@@ -112,7 +116,8 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
 
   return (
     <div
-      className="p-4 rounded-xl transition-all backdrop-blur-md font-sans border-2"
+      className="p-4 rounded-xl transition-all backdrop-blur-md font-sans border-2 subtask-item-status"
+      data-status={subtask.status}
       style={{
         backgroundColor: currentStatus.bg,
         borderColor: currentStatus.border,

@@ -22,19 +22,22 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
   // Status-specific styles with glass effect
   const statusStyles = {
     todo: {
-      bg: 'rgba(147, 197, 253, 0.15)',
-      border: 'rgba(147, 197, 253, 0.4)',
-      shadow: '0 0 20px rgba(147, 197, 253, 0.25)',
+      bg: 'rgb(80, 115, 160)',
+      bgBlur: 'rgba(147, 197, 253, 0.35)',
+      border: 'rgba(147, 197, 253, 0.6)',
+      shadow: '0 0 20px rgba(147, 197, 253, 0.4)',
     },
     in_progress: {
-      bg: 'rgba(167, 139, 250, 0.18)',
-      border: 'rgba(167, 139, 250, 0.5)',
-      shadow: '0 0 24px rgba(167, 139, 250, 0.35)',
+      bg: 'rgb(100, 90, 150)',
+      bgBlur: 'rgba(167, 139, 250, 0.38)',
+      border: 'rgba(167, 139, 250, 0.7)',
+      shadow: '0 0 24px rgba(167, 139, 250, 0.5)',
     },
     done: {
-      bg: 'rgba(52, 211, 153, 0.15)',
-      border: 'rgba(52, 211, 153, 0.4)',
-      shadow: '0 0 20px rgba(52, 211, 153, 0.25)',
+      bg: 'rgb(50, 120, 100)',
+      bgBlur: 'rgba(52, 211, 153, 0.35)',
+      border: 'rgba(52, 211, 153, 0.6)',
+      shadow: '0 0 20px rgba(52, 211, 153, 0.4)',
     },
   };
 
@@ -43,7 +46,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
   return (
     <div
       onClick={onClick}
-      className="p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02] backdrop-blur-xl font-sans text-white"
+      className="p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02] backdrop-blur-xl font-sans text-white task-card-status"
       style={{
         backgroundColor: currentStatus.bg,
         borderColor: currentStatus.border,

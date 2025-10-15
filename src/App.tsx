@@ -535,10 +535,11 @@ function App() {
           backgroundImage: 'url(/assets/image/background.jpg)',
           backgroundSize: 'auto',
           backgroundRepeat: 'repeat',
+          opacity: 0.4, //TODO: revisar
         }}
       />
-      {/* Dark overlay for better contrast */}
-      <div className="fixed inset-0 z-0 bg-black/40" />
+      {/* Dark overlay for better contrast - Enhanced for Linux */}
+      <div className="fixed inset-0 z-0 bg-black/65" />
 
       <XpGainPopup />
 
@@ -608,26 +609,27 @@ function App() {
             </div>
 
             <div
-              className="glass-panel p-6 mb-6 border-2 transition-all"
+              className="glass-panel p-6 mb-6 border-2 transition-all task-detail-status"
+              data-status={currentTask.status}
               style={{
                 backgroundColor:
                   currentTask.status === 'done'
-                    ? 'rgba(52, 211, 153, 0.15)'
+                    ? 'rgb(50, 120, 100)'
                     : currentTask.status === 'in_progress'
-                      ? 'rgba(167, 139, 250, 0.18)'
-                      : 'rgba(147, 197, 253, 0.15)',
+                      ? 'rgb(100, 90, 150)'
+                      : 'rgb(80, 115, 160)',
                 borderColor:
                   currentTask.status === 'done'
-                    ? 'rgba(52, 211, 153, 0.4)'
+                    ? 'rgba(52, 211, 153, 0.7)'
                     : currentTask.status === 'in_progress'
-                      ? 'rgba(167, 139, 250, 0.5)'
-                      : 'rgba(147, 197, 253, 0.4)',
+                      ? 'rgba(167, 139, 250, 0.8)'
+                      : 'rgba(147, 197, 253, 0.7)',
                 boxShadow:
                   currentTask.status === 'done'
-                    ? '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(52, 211, 153, 0.25)'
+                    ? '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 20px rgba(52, 211, 153, 0.4)'
                     : currentTask.status === 'in_progress'
-                      ? '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 24px rgba(167, 139, 250, 0.35)'
-                      : '0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(147, 197, 253, 0.25)',
+                      ? '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 24px rgba(167, 139, 250, 0.5)'
+                      : '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 20px rgba(147, 197, 253, 0.4)',
                 backdropFilter: 'blur(20px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(20px) saturate(180%)',
               }}

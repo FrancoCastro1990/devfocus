@@ -15,10 +15,10 @@ export const Button: React.FC<ButtonProps> = ({
   const baseClasses = 'font-sans font-medium transition-all focus:outline-none focus:ring-2 focus:ring-accent-purple/50 rounded-xl backdrop-blur-sm border';
 
   const variantClasses = {
-    primary: 'bg-accent-purple/20 border-accent-purple/40 text-white hover:bg-accent-purple/30 hover:border-accent-purple/60 active:scale-95 shadow-glass',
-    secondary: 'bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:border-white/30 hover:text-white active:scale-95',
-    danger: 'bg-red-500/20 border-red-500/40 text-red-300 hover:bg-red-500/30 hover:border-red-500/60 active:scale-95',
-    success: 'bg-accent-emerald/20 border-accent-emerald/40 text-white hover:bg-accent-emerald/30 hover:border-accent-emerald/60 active:scale-95',
+    primary: 'bg-accent-purple/40 border-accent-purple/60 text-white hover:bg-accent-purple/50 hover:border-accent-purple/80 active:scale-95 shadow-glass',
+    secondary: 'bg-white/15 border-white/35 text-white hover:bg-white/25 hover:border-white/45 active:scale-95',
+    danger: 'bg-red-500/40 border-red-500/60 text-red-100 hover:bg-red-500/50 hover:border-red-500/80 active:scale-95',
+    success: 'bg-accent-emerald/40 border-accent-emerald/60 text-white hover:bg-accent-emerald/50 hover:border-accent-emerald/80 active:scale-95',
   };
 
   const sizeClasses = {

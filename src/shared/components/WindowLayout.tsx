@@ -52,14 +52,17 @@ export const WindowLayout: React.FC<WindowLayoutProps> = ({
       {showBackground && (
         <div
           className="fixed inset-0 z-0 bg-black"
-          style={{ opacity: overlayOpacity }}
+          style={{ opacity: overlayOpacity || 0.65 }}
         />
       )}
 
       {/* Custom Title Bar */}
       <div
-        className="relative z-10 flex items-center justify-between px-4 py-3 bg-glass-primary backdrop-blur-md border-b border-glass-border text-white cursor-move flex-shrink-0"
+        className="relative z-10 flex items-center justify-between px-4 py-3 border-b border-glass-border text-white cursor-move flex-shrink-0"
         data-tauri-drag-region
+        style={{
+          background: 'rgb(70, 70, 90)',
+        }}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
           <span className="font-semibold">{title}</span>
