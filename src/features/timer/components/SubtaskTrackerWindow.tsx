@@ -28,8 +28,9 @@ const SubtaskTrackerWindow: React.FC = () => {
   const [isPaused, setIsPaused] = useState(initialPaused);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [xpPulse, setXpPulse] = useState(false);
 
-  const { activeXpGains, addXpGainAnimation, removeXpGainAnimation } = useCategoryStore();
+  const { activeXpGains, removeXpGainAnimation } = useCategoryStore();
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -87,40 +88,28 @@ const SubtaskTrackerWindow: React.FC = () => {
     };
   }, []);
 
-  // XP gain animation effect - trigger every 5 seconds
+  // XP gain animation effect - trigger pulse every 5 seconds
   useEffect(() => {
     // Only trigger animations if:
     // 1. Subtask has a category
     // 2. Subtask is not paused
     if (!categoryName || !categoryColor || isPaused) return;
 
-    // Trigger XP gain animation every 5 seconds
+    // Trigger XP pulse animation every 5 seconds
     const interval = setInterval(() => {
-      addXpGainAnimation({
-        id: `xp-${Date.now()}`,
-        categoryName,
-        categoryColor,
-        xpAmount: 5,
-        timestamp: Date.now(),
-      });
+      setXpPulse(true);
+      // Reset pulse after animation completes
+      setTimeout(() => setXpPulse(false), 600);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [categoryName, categoryColor, isPaused, addXpGainAnimation]);
+  }, [categoryName, categoryColor, isPaused]);
 
-  // Auto-remove XP animations after 2 seconds
+  // Clean up XP gains store (no longer needed for display)
   useEffect(() => {
-    if (activeXpGains.length === 0) return;
-
-    // Remove oldest animation after 2 seconds
-    const timer = setTimeout(() => {
-      const oldest = activeXpGains[0];
-      if (oldest) {
-        removeXpGainAnimation(oldest.id);
-      }
-    }, 2000);
-
-    return () => clearTimeout(timer);
+    if (activeXpGains.length > 0) {
+      activeXpGains.forEach(gain => removeXpGainAnimation(gain.id));
+    }
   }, [activeXpGains, removeXpGainAnimation]);
 
   const handlePauseResume = useCallback(async () => {
@@ -169,16 +158,21 @@ const SubtaskTrackerWindow: React.FC = () => {
 
   return (
     <div 
-      className="h-screen w-screen text-white select-none flex flex-col overflow-hidden font-sans border-2 border-accent-purple/30 relative"
+      className="h-screen w-screen text-white select-none flex flex-col overflow-hidden font-sans relative"
       style={{
-        background: 'linear-gradient(135deg, rgb(15, 15, 35) 0%, rgb(26, 26, 46) 100%)',
+        background: 'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.15), transparent 50%), radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.15), transparent 50%), linear-gradient(135deg, rgb(15, 15, 35) 0%, rgb(26, 26, 46) 50%, rgb(20, 20, 40) 100%)',
       }}
     >
+      {/* Header with glass effect */}
       <div 
-        className="relative flex items-center justify-between px-3 py-2.5 text-sm border-b border-glass-border cursor-move flex-shrink-0 z-20" 
+        className="relative flex items-center justify-between px-3 py-2.5 text-sm border-b cursor-move flex-shrink-0 z-20 backdrop-blur-xl" 
         data-tauri-drag-region
         style={{
-          background: 'rgb(70, 70, 90)',
+          backgroundColor: 'rgba(100, 90, 150, 0.35)',
+          borderColor: 'rgba(167, 139, 250, 0.3)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
@@ -188,48 +182,88 @@ const SubtaskTrackerWindow: React.FC = () => {
           type="button"
           aria-label="Close tracker"
           onClick={handleClose}
-          className="text-white/60 hover:text-white transition-colors pl-3 pointer-events-auto"
+          className="text-white/60 hover:text-white transition-all pl-3 pointer-events-auto hover:scale-110"
           data-tauri-drag-region-exclude
         >
           <X size={20} />
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 min-h-0 z-20">
-        <div className="text-5xl font-bold tracking-wider text-white">
+      {/* Main content area with glass panel */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 px-6 min-h-0 z-20">
+        {/* Timer display - clean without borders */}
+        <div className="text-7xl font-bold tracking-wider text-white">
           {formattedTime}
         </div>
 
         {categoryName && categoryColor && (
-          <div className="flex items-center gap-2 text-sm">
+          <div 
+            className={`relative flex items-center gap-3 px-4 py-2 rounded-xl border backdrop-blur-xl transition-all duration-200 overflow-hidden`}
+            style={{
+              backgroundColor: `${categoryColor}15`,
+              borderColor: `${categoryColor}40`,
+              backdropFilter: 'blur(16px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+              boxShadow: `0 4px 16px ${categoryColor}15`,
+            }}
+          >
+            {/* Animated border shimmer */}
+            {xpPulse && (
+              <div 
+                className="absolute inset-0 rounded-xl animate-border-sweep"
+                style={{
+                  border: `2px solid ${categoryColor}`,
+                  opacity: 0.6,
+                }}
+              />
+            )}
+            
             <span
-              className="px-3 py-1 border font-sans font-medium text-xs rounded-lg backdrop-blur-sm"
-              style={{
-                backgroundColor: `${categoryColor}15`,
-                borderColor: `${categoryColor}60`,
-                color: categoryColor,
-              }}
+              className="font-sans font-semibold text-sm relative z-10"
+              style={{ color: categoryColor }}
             >
               {categoryName}
             </span>
-            <span className="text-white/60 text-xs font-sans">
+            <div className="h-4 w-px bg-white/20 relative z-10"></div>
+            <span 
+              className={`text-white/80 text-sm font-sans font-medium transition-all duration-200 relative z-10 ${
+                xpPulse ? 'text-white font-semibold' : ''
+              }`}
+            >
               +{seconds} XP
             </span>
           </div>
         )}
 
         {error && (
-          <div className="text-xs text-red-300 text-center font-sans border border-red-400/40 bg-red-500/20 rounded-lg px-3 py-1">
+          <div 
+            className="text-xs text-center font-sans border rounded-xl px-4 py-2 backdrop-blur-xl"
+            style={{
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              borderColor: 'rgba(239, 68, 68, 0.4)',
+              color: '#fca5a5',
+              backdropFilter: 'blur(16px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+            }}
+          >
             {error}
           </div>
         )}
 
-        <div className="flex items-center gap-3 mt-1">
+        {/* Action buttons with glass effect */}
+        <div className="flex items-center gap-3 mt-2">
           <button
             type="button"
             onClick={handlePauseResume}
             disabled={loading}
-            className="glass-button flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-xl border-2 font-sans font-semibold text-sm transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 backdrop-blur-xl flex items-center gap-2"
+            style={{
+              backgroundColor: 'rgba(100, 90, 150, 0.3)',
+              borderColor: 'rgba(167, 139, 250, 0.5)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            }}
           >
             {isPaused ? (
               <>
@@ -247,41 +281,21 @@ const SubtaskTrackerWindow: React.FC = () => {
             type="button"
             onClick={handleDone}
             disabled={loading}
-            className="glass-button flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 rounded-xl border-2 font-sans font-semibold text-sm transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 backdrop-blur-xl flex items-center gap-2"
+            style={{
+              backgroundColor: 'rgba(52, 211, 153, 0.25)',
+              borderColor: 'rgba(52, 211, 153, 0.5)',
+              color: '#6ee7b7',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              boxShadow: '0 4px 16px rgba(52, 211, 153, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            }}
           >
             <CheckCircle2 size={16} />
             <span>Done</span>
           </button>
         </div>
       </div>
-
-      {/* XP Gain Animations */}
-      {activeXpGains.length > 0 && (
-        <div className="absolute top-12 right-4 z-50 pointer-events-none">
-          <div className="flex flex-col gap-2">
-            {activeXpGains.map((gain, index) => (
-              <div
-                key={gain.id}
-                className="animate-float-up"
-                style={{
-                  animationDelay: `${index * 100}ms`,
-                }}
-              >
-                <div
-                  className="px-3 py-1.5 border font-sans font-bold text-sm rounded-xl backdrop-blur-md"
-                  style={{
-                    borderColor: `${gain.categoryColor}60`,
-                    color: gain.categoryColor,
-                    backgroundColor: `${gain.categoryColor}15`,
-                  }}
-                >
-                  +{gain.xpAmount} XP [{gain.categoryName}]
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

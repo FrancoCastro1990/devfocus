@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trash2, Clock, CheckCircle2 } from 'lucide-react';
 import type { TaskWithActiveSubtask } from '../../../shared/types/common.types';
 import { formatRelativeTime } from '../../../shared/utils/dateFormatter';
@@ -13,11 +13,24 @@ interface TaskCardProps {
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [borderPulse, setBorderPulse] = useState(false);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowDeleteModal(true);
   };
+
+  // Border pulse animation for in_progress status
+  useEffect(() => {
+    if (task.status !== 'in_progress') return;
+
+    const interval = setInterval(() => {
+      setBorderPulse(true);
+      setTimeout(() => setBorderPulse(false), 400);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [task.status]);
 
   // Status-specific styles with glass effect
   const statusStyles = {
@@ -46,7 +59,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
   return (
     <div
       onClick={onClick}
-      className="p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02] backdrop-blur-xl font-sans text-white task-card-status"
+      className="relative glass-panel-interactive p-5 border-2 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02] backdrop-blur-xl font-sans text-white task-card-status overflow-hidden"
       style={{
         backgroundColor: currentStatus.bg,
         borderColor: currentStatus.border,
@@ -55,7 +68,18 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onDelete }) =
         boxShadow: `0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1), ${currentStatus.shadow}`,
       }}
     >
-      <div className="flex justify-between items-start">
+      {/* Animated border for in_progress status */}
+      {task.status === 'in_progress' && borderPulse && (
+        <div
+          className="absolute inset-0 rounded-2xl animate-border-sweep pointer-events-none"
+          style={{
+            border: '2px solid rgba(167, 139, 250, 0.8)',
+            opacity: 0.6,
+          }}
+        />
+      )}
+
+      <div className="flex justify-between items-start relative z-10">
         <div className="flex-1">
           <h3 className="font-semibold text-lg">{task.title}</h3>
           {task.description && (

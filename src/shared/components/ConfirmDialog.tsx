@@ -25,8 +25,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   variant = 'danger',
   children,
 }) => {
-  const handleConfirm = () => {
+  const handleConfirm = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onConfirm();
+    onClose();
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onClose();
   };
 
@@ -38,7 +44,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         {children && <div className="mt-4">{children}</div>}
 
         <div className="flex gap-3 justify-end pt-4">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={handleCancel}>
             {cancelText}
           </Button>
           <Button variant={variant} onClick={handleConfirm}>

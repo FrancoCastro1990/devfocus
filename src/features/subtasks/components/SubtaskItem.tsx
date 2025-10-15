@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Pause, CheckCircle2, X } from 'lucide-react';
 import type { Subtask, TimeSession } from '../../../shared/types/common.types';
 import { useTimeCalculation } from '../../../shared/hooks/useTimeCalculation';
@@ -25,6 +25,7 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
   onDelete,
 }) => {
   const isActive = subtask.status === 'in_progress';
+  const [borderPulse, setBorderPulse] = useState(false);
 
   // Use centralized time calculation hook
   const { totalSeconds, formattedTime } = useTimeCalculation({
@@ -32,6 +33,18 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
     session,
     isActive,
   });
+
+  // Border pulse animation for in_progress status
+  useEffect(() => {
+    if (subtask.status !== 'in_progress') return;
+
+    const interval = setInterval(() => {
+      setBorderPulse(true);
+      setTimeout(() => setBorderPulse(false), 400);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [subtask.status]);
 
   // Status-specific styles with glow effects
   const statusStyles = {
@@ -116,7 +129,7 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
 
   return (
     <div
-      className="p-4 rounded-xl transition-all backdrop-blur-md font-sans border-2 subtask-item-status"
+      className="relative p-4 rounded-xl transition-all backdrop-blur-md font-sans border-2 subtask-item-status overflow-hidden"
       data-status={subtask.status}
       style={{
         backgroundColor: currentStatus.bg,
@@ -126,7 +139,18 @@ export const SubtaskItem: React.FC<SubtaskItemProps> = ({
         WebkitBackdropFilter: 'blur(12px) saturate(180%)',
       }}
     >
-      <div className="flex justify-between items-center">
+      {/* Animated border for in_progress status */}
+      {subtask.status === 'in_progress' && borderPulse && (
+        <div
+          className="absolute inset-0 rounded-xl animate-border-sweep pointer-events-none"
+          style={{
+            border: '2px solid rgba(167, 139, 250, 0.8)',
+            opacity: 0.6,
+          }}
+        />
+      )}
+
+      <div className="flex justify-between items-center relative z-10">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             {subtask.status === 'in_progress' && <Play size={16} className="text-accent-purple animate-pulse" />}
