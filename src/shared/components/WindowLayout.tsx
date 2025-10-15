@@ -44,6 +44,7 @@ export const WindowLayout: React.FC<WindowLayoutProps> = ({
             backgroundImage: `url(${backgroundImage})`,
             backgroundSize: 'auto',
             backgroundRepeat: 'repeat',
+            opacity: 0.4,
           }}
         />
       )}
