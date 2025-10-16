@@ -2,8 +2,386 @@
 
 /* Import modern fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Import retro monospace fonts */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
-/* === LIQUID GLASS THEME === */
+/* ============================================================================
+   THEME SYSTEM - Tailwind v4 Configuration
+   ============================================================================
+
+   DevFocus soporta múltiples themes:
+   - Liquid Glass (default): Tema moderno con efectos de vidrio
+   - Retro Terminal: Tema estilo terminal CRT vintage
+
+   El theme se controla con el atributo data-theme en el elemento html
+   ============================================================================ */
+
+/* ============================================================================
+   LIQUID GLASS THEME (Default)
+   ============================================================================ */
+
+/* Theme Variables - Define all design tokens */
+@theme {
+  /* === Color Palette === */
+
+  /* Glass backgrounds with varying opacity */
+  --color-glass-primary: rgba(255, 255, 255, 0.08);
+  --color-glass-secondary: rgba(255, 255, 255, 0.05);
+  --color-glass-tertiary: rgba(255, 255, 255, 0.12);
+  --color-glass-border: rgba(255, 255, 255, 0.18);
+  --color-glass-hover: rgba(255, 255, 255, 0.15);
+
+  /* Panel variants */
+  --color-panel-base: rgba(255, 255, 255, 0.15);
+  --color-panel-hover: rgba(255, 255, 255, 0.25);
+  --color-panel-border: rgba(255, 255, 255, 0.35);
+  --color-panel-border-hover: rgba(255, 255, 255, 0.45);
+
+  /* Input variants */
+  --color-input-base: rgba(255, 255, 255, 0.15);
+  --color-input-hover: rgba(255, 255, 255, 0.25);
+  --color-input-focus: rgba(255, 255, 255, 0.25);
+  --color-input-border: rgba(255, 255, 255, 0.35);
+  --color-input-border-hover: rgba(255, 255, 255, 0.45);
+  --color-input-border-focus: rgba(147, 197, 253, 0.6);
+  --color-input-placeholder: rgba(255, 255, 255, 0.45);
+  --color-input-focus-ring: rgba(147, 197, 253, 0.4);
+
+  /* Accent colors (soft pastels) */
+  --color-accent-purple: #a78bfa;
+  --color-accent-purple-light: #c4b5fd;
+  --color-accent-blue: #60a5fa;
+  --color-accent-blue-light: #93c5fd;
+  --color-accent-pink: #f472b6;
+  --color-accent-pink-light: #f9a8d4;
+  --color-accent-indigo: #818cf8;
+  --color-accent-indigo-light: #a5b4fc;
+  --color-accent-emerald: #34d399;
+  --color-accent-emerald-light: #6ee7b7;
+
+  /* Status colors with transparency */
+  --color-status-todo: rgba(147, 197, 253, 0.2);
+  --color-status-todo-border: rgba(147, 197, 253, 0.4);
+  --color-status-todo-text: #93c5fd;
+
+  --color-status-in-progress: rgba(167, 139, 250, 0.2);
+  --color-status-in-progress-border: rgba(167, 139, 250, 0.4);
+  --color-status-in-progress-text: #a78bfa;
+
+  --color-status-paused: rgba(129, 140, 248, 0.2);
+  --color-status-paused-border: rgba(129, 140, 248, 0.4);
+  --color-status-paused-text: #818cf8;
+
+  --color-status-done: rgba(52, 211, 153, 0.2);
+  --color-status-done-border: rgba(52, 211, 153, 0.4);
+  --color-status-done-text: #34d399;
+
+  /* Window backgrounds (for Linux fallback) */
+  --color-window-drag-region: rgba(45, 45, 65, 0.9);
+  --color-dropdown-bg: #16213e;
+
+  /* === Shadows === */
+  --shadow-glass-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-glass-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --shadow-glass-xl: 0 12px 48px rgba(0, 0, 0, 0.25);
+  --shadow-inner-glass: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+
+  /* Panel shadows */
+  --shadow-panel: 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-panel-hover: 0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2), inset 0 -1px 2px rgba(0, 0, 0, 0.15);
+
+  /* Button shadows */
+  --shadow-button: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  --shadow-button-hover: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --shadow-button-active: 0 4px 16px rgba(0, 0, 0, 0.2);
+
+  /* Input shadows */
+  --shadow-input: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  --shadow-input-hover: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --shadow-input-focus: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 0 3px rgba(147, 197, 253, 0.4);
+
+  /* === Backdrop Blur === */
+  --blur-xs: 4px;
+  --blur-sm: 8px;
+  --blur-md: 12px;
+  --blur-lg: 20px;
+  --blur-xl: 32px;
+
+  /* === Font Families === */
+  --font-sans: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Inter', 'SF Pro Display', sans-serif;
+
+  /* === Animations === */
+  --animate-float-up: float-up 2s ease-out forwards;
+  --animate-xp-popup: xp-popup 2s ease-in-out forwards;
+  --animate-border-sweep: border-sweep 0.4s ease-out forwards;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-scale-in: scale-in 0.2s ease-out;
+}
+
+/* ============================================================================
+   RETRO TERMINAL THEME
+   ============================================================================
+
+   Classic CRT terminal theme with phosphor green colors
+   Activated with [data-theme="retro"] on html element
+   ============================================================================ */
+
+[data-theme="retro"] {
+  /* Override color variables for retro theme */
+
+  /* Glass/Panel backgrounds - Using dark terminal colors */
+  --color-glass-primary: rgba(0, 255, 128, 0.05);
+  --color-glass-secondary: rgba(0, 255, 128, 0.03);
+  --color-glass-tertiary: rgba(0, 255, 128, 0.08);
+  --color-glass-border: rgba(0, 255, 128, 0.3);
+  --color-glass-hover: rgba(0, 255, 128, 0.1);
+
+  --color-panel-base: rgba(17, 21, 24, 0.95);
+  --color-panel-hover: rgba(26, 31, 35, 0.95);
+  --color-panel-border: rgba(0, 255, 128, 0.4);
+  --color-panel-border-hover: rgba(0, 255, 128, 0.6);
+
+  /* Input variants - Terminal style */
+  --color-input-base: rgba(17, 21, 24, 0.9);
+  --color-input-hover: rgba(26, 31, 35, 0.9);
+  --color-input-focus: rgba(26, 31, 35, 0.95);
+  --color-input-border: rgba(0, 255, 128, 0.5);
+  --color-input-border-hover: rgba(0, 255, 128, 0.7);
+  --color-input-border-focus: rgba(0, 255, 128, 0.9);
+  --color-input-placeholder: rgba(0, 153, 77, 0.6);
+  --color-input-focus-ring: rgba(0, 255, 128, 0.3);
+
+  /* Accent colors - Terminal palette */
+  --color-accent-purple: #a78bfa;
+  --color-accent-purple-light: #c4b5fd;
+  --color-accent-blue: #00ffff;
+  --color-accent-blue-light: #66ffff;
+  --color-accent-pink: #ff6699;
+  --color-accent-pink-light: #ff99bb;
+  --color-accent-indigo: #00ccff;
+  --color-accent-indigo-light: #66ddff;
+  --color-accent-emerald: #00ff80;
+  --color-accent-emerald-light: #66ffb3;
+
+  /* Status colors - Terminal style */
+  --color-status-todo: #2a3f4a;
+  --color-status-todo-border: rgba(0, 255, 128, 0.5);
+  --color-status-todo-text: #00ffff;
+
+  --color-status-in-progress: #1a3a2a;
+  --color-status-in-progress-border: rgba(0, 255, 128, 0.7);
+  --color-status-in-progress-text: #00ff80;
+
+  --color-status-paused: #3a2f1a;
+  --color-status-paused-border: rgba(255, 195, 0, 0.6);
+  --color-status-paused-text: #ffc300;
+
+  --color-status-done: #1a2f25;
+  --color-status-done-border: rgba(0, 204, 102, 0.6);
+  --color-status-done-text: #00cc66;
+
+  /* Window backgrounds */
+  --color-window-drag-region: rgba(10, 14, 15, 0.98);
+  --color-dropdown-bg: #111518;
+
+  /* Shadows - Glow instead of normal shadows */
+  --shadow-glass-sm: 0 0 8px rgba(0, 255, 128, 0.2);
+  --shadow-glass: 0 0 16px rgba(0, 255, 128, 0.25);
+  --shadow-glass-lg: 0 0 32px rgba(0, 255, 128, 0.3);
+  --shadow-glass-xl: 0 0 48px rgba(0, 255, 128, 0.35);
+  --shadow-inner-glass: inset 0 0 8px rgba(0, 255, 128, 0.1);
+
+  --shadow-panel: 0 0 16px rgba(0, 255, 128, 0.2), inset 0 1px 1px rgba(0, 255, 128, 0.1);
+  --shadow-panel-hover: 0 0 24px rgba(0, 255, 128, 0.3), inset 0 1px 1px rgba(0, 255, 128, 0.15);
+
+  --shadow-button: 0 0 16px rgba(0, 255, 128, 0.3), inset 0 1px 0 rgba(0, 255, 128, 0.2);
+  --shadow-button-hover: 0 0 24px rgba(0, 255, 128, 0.4), inset 0 1px 0 rgba(0, 255, 128, 0.3);
+  --shadow-button-active: 0 0 8px rgba(0, 255, 128, 0.2);
+
+  --shadow-input: 0 0 8px rgba(0, 255, 128, 0.2), inset 0 1px 0 rgba(0, 255, 128, 0.1);
+  --shadow-input-hover: 0 0 12px rgba(0, 255, 128, 0.3), inset 0 1px 0 rgba(0, 255, 128, 0.15);
+  --shadow-input-focus: 0 0 16px rgba(0, 255, 128, 0.4), inset 0 1px 0 rgba(0, 255, 128, 0.2), 0 0 0 2px rgba(0, 255, 128, 0.3);
+
+  /* Font families - Monospace for retro feel */
+  --font-sans: 'IBM Plex Mono', 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-display: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+}
+
+/* Retro theme specific styles */
+[data-theme="retro"] body {
+  /* Dark terminal background */
+  background: #0a0e0f;
+  background-attachment: fixed;
+  font-family: var(--font-sans);
+  color: #00ff80;
+}
+
+/* CRT scanline effect for retro theme */
+[data-theme="retro"] body::before {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 128, 0.03) 0px,
+    transparent 1px,
+    transparent 2px,
+    rgba(0, 255, 128, 0.03) 3px
+  );
+}
+
+/* Text glow effect for retro theme */
+[data-theme="retro"] h1,
+[data-theme="retro"] h2,
+[data-theme="retro"] h3 {
+  text-shadow: 0 0 10px rgba(0, 255, 128, 0.5);
+}
+
+/* Border glow for panels in retro theme */
+[data-theme="retro"] .glass-panel {
+  box-shadow: 0 0 20px rgba(0, 255, 128, 0.2), inset 0 1px 1px rgba(0, 255, 128, 0.1);
+}
+
+[data-theme="retro"] .glass-panel:hover {
+  box-shadow: 0 0 30px rgba(0, 255, 128, 0.3), inset 0 1px 1px rgba(0, 255, 128, 0.15);
+}
+
+/* Scrollbar retro style */
+[data-theme="retro"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 128, 0.3);
+  box-shadow: 0 0 5px rgba(0, 255, 128, 0.5);
+}
+
+[data-theme="retro"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 128, 0.5);
+}
+
+/* Selection retro style */
+[data-theme="retro"] ::selection {
+  background: rgba(0, 255, 128, 0.3);
+  color: #00ff80;
+  text-shadow: 0 0 5px rgba(0, 255, 128, 0.8);
+}
+
+/* ============================================================================
+   Custom Utilities - Using @utility directive
+   ============================================================================ */
+
+@utility glass-panel {
+  background: var(--color-panel-base);
+  border: 1px solid var(--color-panel-border);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(var(--blur-sm));
+  box-shadow: var(--shadow-panel);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: var(--color-panel-hover);
+    border-color: var(--color-panel-border-hover);
+    box-shadow: var(--shadow-panel-hover);
+  }
+}
+
+@utility glass-panel-interactive {
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@utility glass-button {
+  background: var(--color-panel-base);
+  border: 1px solid var(--color-panel-border);
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(var(--blur-md));
+  box-shadow: var(--shadow-button);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: var(--color-panel-hover);
+    border-color: var(--color-panel-border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-button-hover);
+  }
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: var(--shadow-button-active);
+  }
+}
+
+@utility glass-input {
+  background: var(--color-input-base);
+  border: 2px solid var(--color-input-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #ffffff;
+  outline: none;
+  backdrop-filter: blur(var(--blur-md));
+  box-shadow: var(--shadow-input);
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: var(--color-input-hover);
+    border-color: var(--color-input-border-hover);
+    box-shadow: var(--shadow-input-hover);
+  }
+
+  &:focus {
+    background: var(--color-input-focus);
+    border-color: var(--color-input-border-focus);
+    box-shadow: var(--shadow-input-focus);
+    transform: translateY(-1px);
+  }
+
+  &::placeholder {
+    color: var(--color-input-placeholder);
+  }
+}
+
+@utility status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+@utility status-badge-todo {
+  background: var(--color-status-todo);
+  border-color: var(--color-status-todo-border);
+  color: var(--color-status-todo-text);
+}
+
+@utility status-badge-in-progress {
+  background: var(--color-status-in-progress);
+  border-color: var(--color-status-in-progress-border);
+  color: var(--color-status-in-progress-text);
+}
+
+@utility status-badge-done {
+  background: var(--color-status-done);
+  border-color: var(--color-status-done-border);
+  color: var(--color-status-done-text);
+}
+
+/* ============================================================================
+   Base Styles
+   ============================================================================ */
 
 * {
   box-sizing: border-box;
@@ -23,7 +401,7 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   background-attachment: fixed;
   color: #ffffff;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
@@ -44,112 +422,13 @@ body::before {
   z-index: 0;
 }
 
-/* Glass panel base style - Matching Button secondary style exactly */
-.glass-panel {
-  /* Same transparency as Button secondary variant */
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 0.75rem;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15),
-              inset 0 1px 1px rgba(255, 255, 255, 0.15),
-              inset 0 -1px 2px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* ============================================================================
+   Select Component Styles
+   ============================================================================ */
 
-.glass-panel:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2),
-              inset 0 1px 1px rgba(255, 255, 255, 0.2),
-              inset 0 -1px 2px rgba(0, 0, 0, 0.15);
-}
-
-/* Interactive variant - adds lift effect on hover */
-.glass-panel-interactive {
-  cursor: pointer;
-}
-
-.glass-panel-interactive:hover {
-  transform: translateY(-2px);
-}
-
-.glass-panel-interactive:active {
-  transform: translateY(0);
-}
-
-/* Glass button styles - Matching Button component */
-.glass-button {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 0.75rem;
-  padding: 0.625rem 1.25rem;
-  color: #ffffff;
-  font-weight: 500;
-  cursor: pointer;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-button:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.45);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4),
-              inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.glass-button:active {
-  transform: scale(0.95);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Glass input styles - Matching Button component */
-.glass-input {
-  background: rgba(255, 255, 255, 0.15);
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
-  color: #ffffff;
-  outline: none;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-input:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3),
-              inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.glass-input:focus {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(147, 197, 253, 0.6);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3),
-              0 0 0 3px rgba(147, 197, 253, 0.4);
-  transform: translateY(-1px);
-}
-
-.glass-input::placeholder {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-/* Select-specific styling - Matching custom Select component */
 select.glass-input {
   cursor: pointer;
   appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   /* Custom chevron icon */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -158,97 +437,45 @@ select.glass-input {
   padding-right: 2.5rem;
 }
 
-/* Select when opened/active */
 select.glass-input:active,
 select.glass-input:focus {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(147, 197, 253, 0.5);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
               0 8px 24px rgba(0, 0, 0, 0.15),
               inset 0 1px 0 rgba(255, 255, 255, 0.2),
               0 0 0 3px rgba(147, 197, 253, 0.25),
               0 0 30px rgba(147, 197, 253, 0.3);
-  transform: translateY(-1px);
 }
 
-/* Select dropdown - Enhanced styling with better contrast */
 select.glass-input option {
-  /* Dark solid background matching the theme */
-  background-color: #16213e;
-  background-image: none;
+  background-color: var(--color-dropdown-bg);
   color: #ffffff;
   padding: 0.875rem 1.25rem;
   font-weight: 500;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.6;
   font-size: 0.925rem;
   letter-spacing: 0.01em;
 }
 
-/* Selected/Checked option - Purple gradient theme */
 select.glass-input option:checked,
 select.glass-input option[selected] {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-color: #667eea;
   color: #ffffff;
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Webkit-specific option styling (Chrome, Safari, Edge, Tauri) */
 @supports (-webkit-appearance: none) {
-  select.glass-input option {
-    background-color: #16213e;
-    background-image: none;
-    color: #ffffff;
-  }
-
-  /* Hover state - Subtle purple tint */
   select.glass-input option:hover {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
-    background-color: rgba(102, 126, 234, 0.6);
     color: #ffffff;
   }
-
-  /* Checked state - Full purple gradient */
-  select.glass-input option:checked,
-  select.glass-input option[selected] {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-color: #667eea;
-    color: #ffffff;
-    font-weight: 600;
-  }
 }
 
-/* Firefox-specific option styling */
-@-moz-document url-prefix() {
-  select.glass-input option {
-    background-color: #16213e !important;
-    color: #ffffff !important;
-    padding: 0.875rem 1.25rem !important;
-  }
+/* ============================================================================
+   Scrollbar Styles
+   ============================================================================ */
 
-  select.glass-input option:checked,
-  select.glass-input option[selected] {
-    background-color: #667eea !important;
-    background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: #ffffff !important;
-    font-weight: 600 !important;
-  }
-}
-
-/* Tauri-specific enhancements */
-@supports selector(::-webkit-scrollbar) {
-  select.glass-input option {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  select.glass-input option:last-child {
-    border-bottom: none;
-  }
-}
-
-/* Scrollbar styling (glass theme) */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -262,28 +489,28 @@ select.glass-input option[selected] {
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(var(--blur-sm));
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Selection styling */
+/* ============================================================================
+   Selection Styles
+   ============================================================================ */
+
 ::selection {
   background: rgba(255, 255, 255, 0.3);
   color: #ffffff;
 }
 
-::-moz-selection {
-  background: rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-}
+/* ============================================================================
+   Animations & Keyframes
+   ============================================================================ */
 
-/* XP float animation */
 .animate-float-up {
-  animation: float-up 2s ease-out forwards;
+  animation: var(--animate-float-up);
 }
 
 @keyframes float-up {
@@ -305,9 +532,8 @@ select.glass-input option[selected] {
   }
 }
 
-/* XP popup animation - fade in, stay, fade out */
 .animate-xp-popup {
-  animation: xp-popup 2s ease-in-out forwards;
+  animation: var(--animate-xp-popup);
 }
 
 @keyframes xp-popup {
@@ -332,9 +558,8 @@ select.glass-input option[selected] {
   }
 }
 
-/* Border sweep animation for XP gain */
 .animate-border-sweep {
-  animation: border-sweep 0.4s ease-out forwards;
+  animation: var(--animate-border-sweep);
 }
 
 @keyframes border-sweep {
@@ -352,109 +577,73 @@ select.glass-input option[selected] {
   }
 }
 
-/* Task card status backgrounds with fallback */
-.task-card-status {
-  /* Solid background is set via inline styles */
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes scale-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================================================
+   Component-Specific Styles (backwards compatibility)
+   ============================================================================ */
+
+/* Task card status backgrounds with fallback for Linux */
 @supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
   .task-card-status[style*="rgb(80, 115, 160)"] {
-    background-color: rgba(147, 197, 253, 0.35) !important;
+    background-color: var(--color-status-todo) !important;
   }
-  
+
   .task-card-status[style*="rgb(100, 90, 150)"] {
-    background-color: rgba(167, 139, 250, 0.38) !important;
+    background-color: var(--color-status-in-progress) !important;
   }
-  
+
   .task-card-status[style*="rgb(50, 120, 100)"] {
-    background-color: rgba(52, 211, 153, 0.35) !important;
+    background-color: var(--color-status-done) !important;
   }
 }
 
-/* Task detail status backgrounds with fallback */
-.task-detail-status {
-  /* Solid background is set via inline styles */
-}
-
+/* Task detail status backgrounds */
 @supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
   .task-detail-status[data-status="todo"] {
-    background-color: rgba(147, 197, 253, 0.4) !important;
+    background-color: var(--color-status-todo) !important;
   }
-  
+
   .task-detail-status[data-status="in_progress"] {
-    background-color: rgba(167, 139, 250, 0.45) !important;
+    background-color: var(--color-status-in-progress) !important;
   }
-  
+
   .task-detail-status[data-status="done"] {
-    background-color: rgba(52, 211, 153, 0.4) !important;
+    background-color: var(--color-status-done) !important;
   }
 }
 
-/* Subtask item status backgrounds with fallback */
-.subtask-item-status {
-  /* Solid background is set via inline styles */
-}
-
+/* Subtask item status backgrounds */
 @supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
   .subtask-item-status[data-status="todo"] {
-    background-color: rgba(147, 197, 253, 0.2) !important;
+    background-color: var(--color-status-todo) !important;
   }
-  
+
   .subtask-item-status[data-status="in_progress"] {
-    background-color: rgba(167, 139, 250, 0.2) !important;
+    background-color: var(--color-status-in-progress) !important;
   }
-  
+
   .subtask-item-status[data-status="paused"] {
-    background-color: rgba(129, 140, 248, 0.2) !important;
+    background-color: var(--color-status-paused) !important;
   }
-  
+
   .subtask-item-status[data-status="done"] {
-    background-color: rgba(52, 211, 153, 0.2) !important;
+    background-color: var(--color-status-done) !important;
   }
 }
 
-/* Window title bars - solid backgrounds for Linux */
-[data-tauri-drag-region] {
-  /* Solid background set via inline styles */
-}
-
+/* Window title bars with backdrop blur support */
 @supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px)) {
   [data-tauri-drag-region] {
-    background: rgba(45, 45, 65, 0.9) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: var(--color-window-drag-region) !important;
+    backdrop-filter: blur(var(--blur-lg));
   }
-}
-
-/* Status badge styles */
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid;
-  transition: all 0.2s ease;
-}
-
-.status-badge-todo {
-  background: rgba(147, 197, 253, 0.2);
-  border-color: rgba(147, 197, 253, 0.4);
-  color: #93c5fd;
-}
-
-.status-badge-in-progress {
-  background: rgba(167, 139, 250, 0.2);
-  border-color: rgba(167, 139, 250, 0.4);
-  color: #a78bfa;
-}
-
-.status-badge-done {
-  background: rgba(52, 211, 153, 0.2);
-  border-color: rgba(52, 211, 153, 0.4);
-  color: #34d399;
 }

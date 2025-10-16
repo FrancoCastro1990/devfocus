@@ -20,6 +20,8 @@ A modern desktop task management application with integrated time tracking and g
 - 🔔 **System Tray Integration**: Minimize to tray, quick access menu, and tray notifications
 - 💾 **Offline First**: All data stored locally in SQLite
 - 🎨 **Modern UI**: Clean interface with animated status indicators and XP notifications
+- 🌟 **Splash Screen**: Professional startup screen with smooth transition
+- 🎭 **Theme System**: Dual themes (Glass & Retro Terminal) with instant switching
 - ⚡ **Performance**: Native desktop app with minimal resource usage
 
 ## 🎮 Gamification System
@@ -239,6 +241,15 @@ In the main task list, tasks with active subtasks display:
 - "Working on: [subtask name]" label
 - **Animated border sweep effect** every 5 seconds (subtle light moving across the border)
 
+### Splash Screen
+
+When launching DevFocus:
+- Professional startup screen displays during initialization
+- Clean, minimalist design with app branding
+- Smooth spinner animation indicates loading progress
+- Automatically transitions to main window after 2 seconds
+- Consistent with the liquid glass theme aesthetic
+
 ### Viewing Metrics
 
 When all subtasks in a task are completed:
@@ -293,17 +304,20 @@ devfocus/
 │   │   │   │                        # CategoryCard, XpGainPopup
 │   │   │   ├── hooks/               # useCategories
 │   │   │   └── store/               # categoryStore (Zustand)
-│   │   ├── user-profile/            # 🔥 NEW: Global Level & Streak system
+│   │   ├── user-profile/            # 🔥 Global Level & Streak system
 │   │   │   ├── components/          # GlobalLevelHeader, StreakIndicator
 │   │   │   ├── hooks/               # useUserProfile
 │   │   │   └── store/               # userProfileStore (Zustand)
 │   │   ├── timer/
 │   │   │   ├── components/          # SubtaskTrackerWindow
 │   │   │   └── hooks/               # useTimer
-│   │   └── metrics/
-│   │       └── components/          # MetricsModal, GeneralSummaryWindow
+│   │   ├── metrics/
+│   │   │   └── components/          # MetricsModal, GeneralSummaryWindow
+│   │   └── splash/                  # 🌟 Splash Screen
+│   │       └── components/          # SplashScreen
 │   ├── shared/
-│   │   ├── components/              # Button, Input, Modal
+│   │   ├── components/              # Button, Input, Modal, ThemeToggle
+│   │   ├── contexts/                # ThemeContext
 │   │   ├── types/                   # TypeScript type definitions
 │   │   └── utils/                   # formatTime, formatDate
 │   ├── lib/
@@ -499,11 +513,13 @@ npm install
 - [x] **Floating timer widget** with category and XP display
 - [x] **Category statistics** in dashboard
 - [x] **System tray integration** with quick actions menu
+- [x] **Dual theme system** (Glass & Retro Terminal) with instant switching
+- [x] **Professional splash screen** with smooth startup transition
 
 ### Planned Features
 
 - [ ] **Desktop notifications** when subtasks complete or level up
-- [ ] **Dark mode** theme support
+- [ ] **Additional themes** expansion
 - [ ] **Keyboard shortcuts** for power users
 - [ ] **Data export** (CSV, JSON)
 - [ ] **Priority levels** for tasks

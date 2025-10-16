@@ -6,12 +6,16 @@
     "main",
     "general-summary",
     "task-summary",
-    "subtask-tracker"
+    "subtask-tracker",
+    "splashscreen"
   ],
   "permissions": [
     "core:default",
     "core:webview:allow-create-webview-window",
     "core:window:allow-close",
-    "core:window:allow-start-dragging"
+    "core:window:allow-start-dragging",
+    "core:window:allow-show",
+    "core:window:allow-set-focus",
+    "core:window:allow-get-all-windows"
   ]
 }

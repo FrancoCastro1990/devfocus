@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Modal } from './shared/components/Modal';
 import { Button } from './shared/components/Button';
+import { ThemeToggle } from './shared/components/ThemeToggle';
 import { TaskList } from './features/tasks/components/TaskList';
 import { TaskForm } from './features/tasks/components/TaskForm';
 import { SubtaskList } from './features/subtasks/components/SubtaskList';
@@ -569,6 +570,7 @@ function App() {
                 Tasks
               </h2>
               <div className="flex gap-2">
+                <ThemeToggle />
                 <Button variant="secondary" size="sm" onClick={handleOpenGeneralSummary}>
                   Summary
                 </Button>
